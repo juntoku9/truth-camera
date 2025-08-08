@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeftIcon, CameraIcon, CheckCircleIcon, DocumentDuplicateIcon, PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, CameraIcon, CheckCircleIcon, DocumentDuplicateIcon, PhotoIcon, XMarkIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { createProofRecord, saveProof, type ProofRecord } from '../utils/crypto';
 
 export default function UploadPage() {
@@ -12,7 +12,8 @@ export default function UploadPage() {
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
-  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [captureLog, setCaptureLog] = useState<string>('');
+  const [videoDebug, setVideoDebug] = useState<{readyState:number; vw:number; vh:number; track?:string}>({readyState: -1, vw: 0, vh: 0});
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,14 +28,39 @@ export default function UploadPage() {
     };
   }, []);
 
+  // Debug captured image state
+  useEffect(() => {
+    if (capturedImage) {
+      console.log('Captured image state updated, length:', capturedImage.length);
+      console.log('Image preview (first 100 chars):', capturedImage.substring(0, 100));
+    } else {
+      console.log('Captured image state cleared');
+    }
+  }, [capturedImage]);
+
+  // Live debug for video/track state
+  useEffect(() => {
+    if (!isCameraActive) return;
+    const id = setInterval(() => {
+      const v = videoRef.current;
+      const s = streamRef.current;
+      const track = s?.getVideoTracks?.()[0];
+      setVideoDebug({
+        readyState: v ? v.readyState : -1,
+        vw: v?.videoWidth || 0,
+        vh: v?.videoHeight || 0,
+        track: track ? `${track.readyState}${track.muted ? ' (muted)' : ''}` : 'none',
+      });
+    }, 500);
+    return () => clearInterval(id);
+  }, [isCameraActive]);
+
   const startCamera = useCallback(async () => {
     setCameraError(null);
-    setVideoLoaded(false);
     
     try {
       console.log('Starting camera...');
       
-      // Try the most basic constraints first
       const constraints = { 
         video: true,
         audio: false 
@@ -42,83 +68,32 @@ export default function UploadPage() {
 
       console.log('Requesting camera access...');
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log('Got stream:', stream);
-      console.log('Video tracks:', stream.getVideoTracks().length);
-      
-      if (stream.getVideoTracks().length === 0) {
-        throw new Error('No video tracks available');
-      }
+      console.log('Got stream with', stream.getVideoTracks().length, 'video tracks');
       
       streamRef.current = stream;
-      setIsCameraActive(true);
       
       if (videoRef.current) {
-        console.log('Setting video srcObject...');
+        console.log('Setting video source...');
         videoRef.current.srcObject = stream;
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.muted = true;
+        videoRef.current.autoplay = true;
         
-        // Set up a simple timeout to mark video as loaded
-        const loadTimeout = setTimeout(() => {
-          console.log('Video load timeout - marking as loaded');
-          setVideoLoaded(true);
-        }, 3000);
-        
-        // Try to detect when video is actually playing
-        const checkVideoReady = () => {
-          if (videoRef.current && videoRef.current.readyState >= 2) {
-            console.log('Video ready state:', videoRef.current.readyState);
-            console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
-            clearTimeout(loadTimeout);
-            setVideoLoaded(true);
-          }
-        };
-
-        // Multiple event listeners to catch video ready state
-        videoRef.current.onloadedmetadata = () => {
-          console.log('Video metadata loaded');
-          checkVideoReady();
-        };
-        
-        videoRef.current.onloadeddata = () => {
-          console.log('Video data loaded');
-          checkVideoReady();
-        };
-        
-        videoRef.current.oncanplay = () => {
-          console.log('Video can play');
-          checkVideoReady();
-        };
-
-        videoRef.current.onplaying = () => {
-          console.log('Video is playing');
-          clearTimeout(loadTimeout);
-          setVideoLoaded(true);
-        };
-
-        videoRef.current.onerror = (err) => {
-          console.error('Video error:', err);
-          clearTimeout(loadTimeout);
-          setCameraError('Video playback error. Please try again.');
-        };
-
-        // Force play the video
-        console.log('Attempting to play video...');
+        // Simple play attempt
         try {
-          const playPromise = videoRef.current.play();
-          if (playPromise !== undefined) {
-            await playPromise;
-            console.log('Video play succeeded');
-          }
+          await videoRef.current.play();
+          console.log('Video playing');
         } catch (playError) {
-          console.warn('Video play failed:', playError);
-          // Don't throw error, just log it - video might still work
+          console.warn('Play failed, but continuing:', playError);
         }
-
-        // Additional check after a short delay
-        setTimeout(checkVideoReady, 1000);
       }
       
+      // Set camera as active
+      setIsCameraActive(true);
       setError(null);
       setCameraError(null);
+      
+      console.log('Camera setup complete');
     } catch (err: any) {
       console.error('Camera error:', err);
       
@@ -139,66 +114,183 @@ export default function UploadPage() {
     }
   }, []);
 
-  const stopCamera = useCallback(() => {
+  // Auto-start camera when component mounts
+  useEffect(() => {
+    console.log('Auto-start camera effect triggered');
+    const timer = setTimeout(() => {
+      console.log('Auto-starting camera...');
+      startCamera();
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  const stopCamera = useCallback((options?: { clearPhoto?: boolean }) => {
     console.log('Stopping camera...');
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => {
-        console.log('Stopping track:', track.kind);
         track.stop();
       });
       streamRef.current = null;
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null;
-      videoRef.current.load(); // Reset video element
+      videoRef.current.load();
     }
     setIsCameraActive(false);
-    setCapturedImage(null);
+    if (options?.clearPhoto) {
+      setCapturedImage(null);
+    }
     setCameraError(null);
-    setVideoLoaded(false);
   }, []);
 
-  const capturePhoto = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) {
-      console.error('Video or canvas not available');
-      setError('Camera not ready. Please try again.');
-      return;
+  const capturePhoto = useCallback(async () => {
+    try {
+      setError(null);
+      setCaptureLog('');
+      setCaptureLog('capture clicked');
+
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+
+      if (!canvas) {
+        setError('Internal error: canvas not ready.');
+        setCaptureLog('Canvas not ready');
+        return;
+      }
+
+      // Prefer grabbing a frame directly from the MediaStream track (works even if <video> is black)
+      const stream = streamRef.current;
+      if (stream) {
+        const [track] = stream.getVideoTracks();
+        if (track) {
+          try {
+            // @ts-ignore - ImageCapture may not be typed in TS lib
+            const ImageCaptureCtor = (window as any).ImageCapture;
+            if (ImageCaptureCtor && typeof ImageCaptureCtor === 'function') {
+              const imageCapture = new ImageCaptureCtor(track);
+              // Try takePhoto first (Blob), then fall back to grabFrame
+              if (imageCapture.takePhoto) {
+                setCaptureLog('Using ImageCapture.takePhoto');
+                console.log('Using ImageCapture.takePhoto');
+                let blob: Blob | null = null;
+                try {
+                  blob = await withTimeout<Blob>(imageCapture.takePhoto(), 1500, 'takePhoto');
+                } catch {
+                  blob = null;
+                }
+                if (blob instanceof Blob) {
+                  const dataUrl = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                  });
+                  console.log('Captured (takePhoto) size:', Math.round(dataUrl.length / 1024), 'KB');
+                  setCaptureLog(`takePhoto OK (${Math.round(dataUrl.length / 1024)} KB)`);
+                  setCapturedImage(dataUrl);
+                  stopCamera({ clearPhoto: false });
+                  return;
+                }
+              }
+
+              setCaptureLog('Using ImageCapture.grabFrame');
+              console.log('Using ImageCapture.grabFrame');
+              const bitmap: ImageBitmap = await withTimeout(imageCapture.grabFrame(), 1500, 'grabFrame');
+
+              canvas.width = bitmap.width;
+              canvas.height = bitmap.height;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) {
+                setError('Unable to process image. Please try again.');
+                setCaptureLog('No 2D context');
+                return;
+              }
+              ctx.drawImage(bitmap, 0, 0);
+              const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+              console.log('Captured (ImageCapture) size:', Math.round(imageDataUrl.length / 1024), 'KB');
+              if (!imageDataUrl.startsWith('data:image/')) {
+                setError('Failed to capture image data.');
+                setCaptureLog('Invalid data from grabFrame');
+                return;
+              }
+              setCapturedImage(imageDataUrl);
+              setCaptureLog(`grabFrame OK (${Math.round(imageDataUrl.length / 1024)} KB)`);
+              stopCamera({ clearPhoto: false });
+              return;
+            } else {
+              console.log('ImageCapture API not available; falling back to canvas draw from <video>.');
+              setCaptureLog('ImageCapture not available');
+            }
+          } catch (icErr) {
+            console.warn('ImageCapture failed, falling back to canvas draw:', icErr);
+            setCaptureLog(`ImageCapture error: ${icErr instanceof Error ? icErr.message : String(icErr)}`);
+          }
+        }
+      }
+
+      // Fallback: draw from <video>
+      if (!video) {
+        setError('Camera not ready. Please try again.');
+        setCaptureLog('No video element');
+        return;
+      }
+
+      // Ensure the video has current data
+      if (video.readyState < 2) {
+        console.log('Video not ready (readyState:', video.readyState, ') attempting to play...');
+        try { await video.play(); } catch {}
+        // Wait briefly for a frame
+        await new Promise(res => setTimeout(res, 200));
+      }
+
+      const width = video.videoWidth || video.clientWidth || 640;
+      const height = video.videoHeight || video.clientHeight || 480;
+      console.log('Fallback capture from <video> at', width, 'x', height);
+
+      if (width <= 0 || height <= 0) {
+        setError('Invalid camera dimensions. Please refresh camera.');
+        setCaptureLog(`Invalid dimensions ${width}x${height}`);
+        return;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d');
+      if (!context) {
+        setError('Unable to process image. Please try again.');
+        setCaptureLog('No 2D context fallback');
+        return;
+      }
+      context.drawImage(video, 0, 0, width, height);
+      const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      console.log('Captured (fallback) size:', Math.round(imageDataUrl.length / 1024), 'KB');
+      if (!imageDataUrl.startsWith('data:image/')) {
+        setError('Failed to capture image data.');
+        setCaptureLog('Invalid data from fallback');
+        return;
+      }
+      setCapturedImage(imageDataUrl);
+      setCaptureLog(`fallback OK (${Math.round(imageDataUrl.length / 1024)} KB)`);
+      stopCamera({ clearPhoto: false });
+    } catch (err) {
+      console.error('Error during photo capture:', err);
+      setError(`Capture failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setCaptureLog(`Error: ${err instanceof Error ? err.message : String(err)}`);
     }
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-      console.error('Canvas context not available');
-      setError('Unable to process image. Please try again.');
-      return;
-    }
-
-    // Use actual video dimensions or fallback
-    const width = video.videoWidth || video.clientWidth || 640;
-    const height = video.videoHeight || video.clientHeight || 480;
-    
-    console.log('Capturing photo with dimensions:', width, 'x', height);
-
-    canvas.width = width;
-    canvas.height = height;
-
-    // Draw the video frame to canvas
-    context.drawImage(video, 0, 0, width, height);
-
-    // Get the image data URL
-    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-    console.log('Image captured, size:', Math.round(imageDataUrl.length / 1024), 'KB');
-    
-    if (imageDataUrl.length < 1000) {
-      setError('Failed to capture image. Please ensure your camera is working and try again.');
-      return;
-    }
-    
-    setCapturedImage(imageDataUrl);
-    stopCamera();
   }, [stopCamera]);
+
+  const downloadImage = useCallback(() => {
+    if (!capturedImage) return;
+
+    // Create download link
+    const link = document.createElement('a');
+    link.download = `truth-camera-${new Date().toISOString().split('T')[0]}-${Date.now()}.jpg`;
+    link.href = capturedImage;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [capturedImage]);
 
   const convertDataUrlToFile = (dataUrl: string, filename: string): File => {
     const arr = dataUrl.split(',');
@@ -210,6 +302,14 @@ export default function UploadPage() {
       u8arr[n] = bstr.charCodeAt(n);
     }
     return new File([u8arr], filename, { type: mime });
+  };
+
+  // Utility to timeout a promise
+  const withTimeout = async <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`${label} timeout after ${ms}ms`)), ms)),
+    ]) as T;
   };
 
   const processCapturedImage = async () => {
@@ -254,6 +354,21 @@ export default function UploadPage() {
     return new Date(dateString).toLocaleString();
   };
 
+  const refreshVideo = () => {
+    if (videoRef.current && streamRef.current) {
+      const video = videoRef.current;
+      console.log('Refreshing video display...');
+      
+      // Force video refresh
+      video.style.display = 'none';
+      video.offsetHeight; // Trigger reflow
+      video.style.display = 'block';
+      
+      // Try to restart playback
+      video.play().catch(console.warn);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-4 sm:py-8">
@@ -273,6 +388,19 @@ export default function UploadPage() {
         </div>
 
         <div className="max-w-2xl mx-auto">
+          {/* Debug Info */}
+          <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm">
+            <strong>Debug Info:</strong>
+            <div>Camera Active: {isCameraActive ? 'Yes' : 'No'}</div>
+            <div>Captured Image: {capturedImage ? `Yes (${Math.round(capturedImage.length / 1024)}KB)` : 'No'}</div>
+            <div>Processing: {isProcessing ? 'Yes' : 'No'}</div>
+            <div>Proof Generated: {proof ? 'Yes' : 'No'}</div>
+            <div>Error: {error || 'None'}</div>
+            <div>Camera Error: {cameraError || 'None'}</div>
+            {captureLog && <div>Capture: {captureLog}</div>}
+            <div>Video Debug: {JSON.stringify(videoDebug)}</div>
+          </div>
+
           {!proof ? (
             <>
               {/* Camera Interface */}
@@ -345,40 +473,51 @@ export default function UploadPage() {
                   <div className="relative">
                     <video
                       ref={videoRef}
-                      className="w-full h-64 sm:h-80 bg-gray-900 object-cover"
+                      className="w-full h-64 sm:h-80 bg-gray-800 object-cover"
                       playsInline
                       muted
                       autoPlay
-                      style={{ minHeight: '200px' }}
+                      controls={false}
+                      style={{ minHeight: '200px', display: 'block' }}
                     />
-                    {!videoLoaded && (
-                      <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
-                        <div className="text-center text-white">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2 mx-auto"></div>
-                          <p className="text-sm">Loading camera...</p>
-                          <p className="text-xs mt-1 text-gray-300">This may take a few seconds</p>
-                        </div>
-                      </div>
-                    )}
-                    {videoLoaded && (
-                      <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-white/70 m-4 rounded-lg"></div>
-                    )}
+                    <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-white/70 m-4 rounded-lg"></div>
+                    
+                    {/* Camera info overlay */}
+                    <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
+                      Camera Active
+                    </div>
+                    
+                    {/* Refresh button overlay */}
+                    <div className="absolute top-4 right-4">
+                      <button
+                        onClick={refreshVideo}
+                        className="bg-black/70 hover:bg-black/90 text-white p-2 rounded-lg transition-colors text-sm"
+                        title="Refresh video if black"
+                      >
+                        🔄 Refresh
+                      </button>
+                    </div>
                   </div>
-                  <div className="p-4 flex flex-col sm:flex-row gap-3 justify-center">
-                    <button
-                      onClick={capturePhoto}
-                      className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-lg"
-                    >
-                      <PhotoIcon className="h-6 w-6" />
-                      {videoLoaded ? 'Capture Photo' : 'Loading...'}
-                    </button>
-                    <button
-                      onClick={stopCamera}
-                      className="flex-1 sm:flex-none bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                    >
-                      <XMarkIcon className="h-5 w-5" />
-                      Cancel
-                    </button>
+                  <div className="p-4">
+                    <p className="text-center text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                      Position yourself in the frame and click capture when ready. If the video is black, click the refresh button above.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <button
+                        onClick={capturePhoto}
+                        className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-lg"
+                      >
+                        <PhotoIcon className="h-6 w-6" />
+                        Capture Photo
+                      </button>
+                      <button
+                        onClick={() => stopCamera({ clearPhoto: true })}
+                        className="flex-1 sm:flex-none bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <XMarkIcon className="h-5 w-5" />
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -386,33 +525,81 @@ export default function UploadPage() {
               {/* Captured Image Preview */}
               {capturedImage && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 mb-6">
-                  <img
-                    src={capturedImage}
-                    alt="Captured"
-                    className="w-full h-64 sm:h-80 object-cover"
-                  />
+                  <div className="relative group">
+                    <img
+                      src={capturedImage}
+                      alt="Captured authentic photo"
+                      className="w-full h-64 sm:h-80 object-cover"
+                      onLoad={() => console.log('Captured image loaded successfully')}
+                      onError={(e) => {
+                        console.error('Error loading captured image:', e);
+                        console.error('Image src length:', capturedImage?.length);
+                        console.error('Image src preview:', capturedImage?.substring(0, 100));
+                      }}
+                    />
+                    {/* Image info overlay */}
+                    <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-lg text-sm">
+                      Authentic Photo Captured
+                    </div>
+                    {/* Download overlay button */}
+                    <div className="absolute top-4 right-4">
+                      <button
+                        onClick={downloadImage}
+                        className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-colors"
+                        title="Download image"
+                      >
+                        <ArrowDownTrayIcon className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </div>
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">
                       Review Your Authentic Photo
                     </h3>
+                    
+                    {/* Image details */}
+                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4 text-sm">
+                      <div className="grid grid-cols-2 gap-2 text-center">
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400 block">Captured</span>
+                          <span className="text-gray-900 dark:text-white font-medium">
+                            {new Date().toLocaleTimeString()}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400 block">Size</span>
+                          <span className="text-gray-900 dark:text-white font-medium">
+                            {Math.round((capturedImage.length * 0.75) / 1024)} KB
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
                     {isProcessing ? (
                       <div className="flex flex-col items-center py-4">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
                         <p className="text-gray-600 dark:text-gray-300">Generating cryptographic proof...</p>
                       </div>
                     ) : (
-                      <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <button
+                          onClick={downloadImage}
+                          className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                        >
+                          <ArrowDownTrayIcon className="h-5 w-5" />
+                          Download
+                        </button>
                         <button
                           onClick={processCapturedImage}
-                          className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors text-lg"
+                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-center"
                         >
                           Generate Proof
                         </button>
                         <button
                           onClick={retakePhoto}
-                          className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                          className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-center"
                         >
-                          Retake Photo
+                          Retake
                         </button>
                       </div>
                     )}
