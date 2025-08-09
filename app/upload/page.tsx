@@ -435,29 +435,27 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
-      <div className="container mx-auto px-4 py-6 sm:py-10">
+    <div className="min-h-screen bg-hero-dark">
+      <div className="page-container mx-auto max-w-5xl py-8 sm:py-12">
         {/* Hero Header */}
-        <div className="flex items-center justify-between mb-6 sm:mb-10">
+        <div className="flex items-center justify-between mb-8 sm:mb-12">
           <Link
             href="/"
-            className="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
+            className="flex items-center text-cyan-300 hover:text-cyan-200 transition-colors"
           >
             <ArrowLeftIcon className="h-5 w-5 mr-2" />
             <span className="hidden sm:inline">Back to Home</span>
             <span className="sm:hidden">Back</span>
           </Link>
           <div className="flex items-center gap-4">
-            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-              Research Prototype
-            </span>
+            <span className="pill px-2.5 py-1 text-xs">Research Prototype</span>
             <WalletConnect />
           </div>
         </div>
 
         <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">Truth Camera</h1>
-          <p className="mt-3 text-sm sm:text-base text-gray-300">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-slate-100">Truth Camera</h1>
+          <p className="mt-3 text-sm sm:text-base text-slate-300">
             Minimal capture tool for blockchain-secured image provenance. Camera-only. No uploads.
           </p>
           <div className="mt-4">
@@ -478,23 +476,23 @@ export default function UploadPage() {
             <>
               {/* Idle State */}
               {!isCameraActive && !capturedImage && (
-                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-8">
+                <div className="panel-dark rounded-[16px] p-8">
                   <div className="text-center">
-                    <CameraIcon className="h-16 w-16 sm:h-20 sm:w-20 text-blue-400/90 mx-auto mb-5" />
-                    <h3 className="text-xl sm:text-2xl font-medium text-white mb-2">
+                    <CameraIcon className="h-16 w-16 sm:h-20 sm:w-20 text-cyan-300 mx-auto mb-5" />
+                    <h3 className="text-xl sm:text-2xl font-medium text-slate-100 mb-2">
                       Direct Capture Only
                     </h3>
-                    <p className="text-gray-300/90 mb-6 text-sm sm:text-base">
+                    <p className="text-slate-300/90 mb-6 text-sm sm:text-base">
                       Capture an authentic frame straight from your device sensor. No files, no drag-and-drop.
                     </p>
                     <button
                       onClick={startCamera}
-                      className="mx-auto inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 sm:px-8 py-3 text-white font-medium shadow-lg shadow-blue-900/40 hover:from-blue-500 hover:to-indigo-500 transition-colors"
+                      className="mx-auto inline-flex items-center gap-2 cta-dark px-6 sm:px-8 py-3 text-sm"
                     >
                       <CameraIcon className="h-5 w-5" />
                       Start Camera
                     </button>
-                    <div className="mt-6 text-xs text-blue-300/80">
+                    <div className="mt-6 text-xs text-cyan-300/80">
                       This is a minimal, tamper-resistant capture flow.
                     </div>
                   </div>
@@ -503,12 +501,12 @@ export default function UploadPage() {
 
               {/* Camera View */}
               {isCameraActive && (
-                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
+                <div className="card-dark overflow-hidden rounded-[16px]">
                   <div className="relative">
-                    <div className="aspect-[16/10] w-full bg-black/70">
+                    <div className="panel-dark aspect-[16/10] w-full bg-black/70">
                       <video
                         ref={videoRef}
-                        className="h-full w-full object-cover rounded-t-2xl"
+                        className="h-full w-full object-cover rounded-t-[16px]"
                         playsInline
                         muted
                         autoPlay
@@ -516,14 +514,14 @@ export default function UploadPage() {
                       />
                     </div>
                     {/* Subtle grid overlay */}
-                    <div className="pointer-events-none absolute inset-0 rounded-t-2xl bg-[radial-gradient(circle_at_center,transparent_0,transparent_60%,rgba(255,255,255,0.04)_100%)]" />
+                    <div className="pointer-events-none absolute inset-0 rounded-t-[16px] bg-[radial-gradient(circle_at_center,transparent_0,transparent_60%,rgba(255,255,255,0.04)_100%)]" />
                     <div className="absolute top-4 left-4 text-[11px] px-2 py-1 rounded-full bg-black/60 text-white/90 border border-white/10">
                       Camera Active
                     </div>
                     <div className="absolute top-4 right-4">
                       <button
                         onClick={refreshVideo}
-                        className="text-xs px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white/90 border border-white/10"
+                        className="text-xs px-2.5 py-1.5 rounded-lg pill"
                         title="Refresh video"
                       >
                         Refresh
@@ -535,14 +533,14 @@ export default function UploadPage() {
                   <div className="flex items-center justify-center gap-3 p-4 border-t border-white/10 bg-gradient-to-b from-white/5 to-transparent">
                     <button
                       onClick={capturePhoto}
-                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-5 py-2.5 text-white font-medium shadow-lg shadow-indigo-900/40 hover:from-indigo-400 hover:to-violet-500 transition-colors text-base"
+                      className="inline-flex items-center gap-2 cta-dark px-5 py-2.5 text-base"
                     >
                       <PhotoIcon className="h-5 w-5" />
                       Capture
                     </button>
                     <button
                       onClick={() => stopCamera({ clearPhoto: true })}
-                      className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 text-white px-5 py-2.5 border border-white/10"
+                      className="inline-flex items-center gap-2 pill px-5 py-2.5"
                     >
                       <XMarkIcon className="h-5 w-5" />
                       Cancel
@@ -553,12 +551,12 @@ export default function UploadPage() {
 
               {/* Captured Image Preview */}
               {capturedImage && (
-                <div ref={previewRef} className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
+                <div ref={previewRef} className="relative card-dark overflow-hidden rounded-[16px]">
                   <div className="relative">
                     <img
                       src={capturedImage}
                       alt="Captured authentic photo"
-                      className="w-full aspect-[16/10] object-cover rounded-t-2xl"
+                      className="w-full aspect-[16/10] object-cover rounded-t-[16px]"
                       key={capturedImage?.slice(0, 64)}
                       onLoad={() => console.log('Captured image loaded successfully')}
                       onError={(e) => {
@@ -567,14 +565,14 @@ export default function UploadPage() {
                         console.error('Image src preview:', capturedImage?.substring(0, 100));
                       }}
                     />
-                    <div className="pointer-events-none absolute inset-0 rounded-t-2xl bg-[radial-gradient(circle_at_center,transparent_0,transparent_60%,rgba(255,255,255,0.04)_100%)]" />
+                    <div className="pointer-events-none absolute inset-0 rounded-t-[16px] bg-[radial-gradient(circle_at_center,transparent_0,transparent_60%,rgba(255,255,255,0.04)_100%)]" />
                     <div className="absolute top-4 left-4 text-[11px] px-2 py-1 rounded-full bg-black/60 text-white/90 border border-white/10">
                       Authentic Frame
                     </div>
                     <div className="absolute top-4 right-4 flex gap-2">
                       <button
                         onClick={downloadImage}
-                        className="p-2 rounded-lg bg-white/10 hover:bg-white/15 text-white border border-white/10"
+                        className="p-2 rounded-lg pill"
                         title="Download image"
                       >
                         <ArrowDownTrayIcon className="h-5 w-5" />
@@ -583,18 +581,18 @@ export default function UploadPage() {
                   </div>
 
                   <div className="p-4 border-t border-white/10">
-                    <div className="grid grid-cols-2 gap-3 text-sm text-gray-300">
+                    <div className="grid grid-cols-2 gap-3 text-sm text-slate-300">
                       <div>
-                        <div className="text-gray-400">Captured</div>
-                        <div className="text-white/90">{new Date().toLocaleTimeString()}</div>
+                        <div className="text-slate-400">Captured</div>
+                        <div className="text-slate-100">{new Date().toLocaleTimeString()}</div>
                       </div>
                       <div>
-                        <div className="text-gray-400">Size</div>
-                        <div className="text-white/90">{Math.round((capturedImage.length * 0.75) / 1024)} KB</div>
+                        <div className="text-slate-400">Size</div>
+                        <div className="text-slate-100">{Math.round((capturedImage.length * 0.75) / 1024)} KB</div>
                       </div>
                     </div>
                     {isProcessing ? (
-                      <div className="flex items-center justify-center gap-3 py-4 text-gray-200">
+                      <div className="flex items-center justify-center gap-3 py-4 text-slate-200">
                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white"></div>
                         Generating cryptographic proof…
                       </div>
@@ -602,7 +600,7 @@ export default function UploadPage() {
                       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <button
                           onClick={downloadImage}
-                          className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 text-white px-4 py-3 border border-white/10"
+                          className="inline-flex items-center justify-center gap-2 pill px-4 py-3"
                         >
                           <ArrowDownTrayIcon className="h-5 w-5" />
                           Download
@@ -610,10 +608,10 @@ export default function UploadPage() {
                         <button
                           onClick={processCapturedImage}
                           disabled={isProcessing || isBlockchainLoading || !canSubmitProofs()}
-                          className={`inline-flex items-center justify-center rounded-xl px-4 py-3 font-medium shadow-lg transition-colors ${
+                          className={`inline-flex items-center justify-center px-4 py-3 font-medium transition-colors rounded-full ${
                             canSubmitProofs() && !isProcessing && !isBlockchainLoading
-                              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-emerald-900/40'
-                              : 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                              ? 'cta-dark text-white'
+                              : 'bg-gray-600 text-gray-300 cursor-not-allowed rounded-full'
                           }`}
                         >
                           {isProcessing || isBlockchainLoading ? (
@@ -629,7 +627,7 @@ export default function UploadPage() {
                         </button>
                         <button
                           onClick={retakePhoto}
-                          className="inline-flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/15 text-white px-4 py-3 border border-white/10"
+                          className="inline-flex items-center justify-center pill px-4 py-3"
                         >
                           Retake
                         </button>
@@ -650,10 +648,10 @@ export default function UploadPage() {
             </>
           ) : (
             /* Proof Results */
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8">
+            <div className="card-dark rounded-[16px] p-6 sm:p-8">
               <div className="flex items-center mb-6">
                 <CheckCircleIcon className="h-6 w-6 sm:h-7 sm:w-7 text-emerald-400 mr-3" />
-                <h2 className="text-xl sm:text-2xl font-medium text-white">
+                <h2 className="text-xl sm:text-2xl font-medium text-slate-100">
                   Authentic Photo Proof Generated
                 </h2>
               </div>
@@ -661,16 +659,14 @@ export default function UploadPage() {
               <div className="space-y-5">
                 {/* Image Hash */}
                 <div>
-                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
+                  <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1">
                     Image Hash (SHA-256)
                   </label>
                   <div className="flex items-center space-x-2">
-                    <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">
-                      {proof.hash}
-                    </code>
+                    <code className="code-block flex-1 text-xs sm:text-sm">{proof.hash}</code>
                     <button
                       onClick={() => copyToClipboard(proof.hash)}
-                      className="flex-shrink-0 p-2 text-gray-300 hover:text-white"
+                      className="flex-shrink-0 p-2 text-slate-300 hover:text-white"
                       title="Copy hash"
                     >
                       <DocumentDuplicateIcon className="h-5 w-5" />
@@ -682,12 +678,10 @@ export default function UploadPage() {
                 <div>
                   <label className="block text-sm font-medium text-emerald-300 mb-1">Transaction Hash</label>
                   <div className="flex items-center gap-2">
-                    <code className="flex-1 px-3 py-2 bg-black/20 border border-emerald-500/20 rounded-lg text-emerald-200 text-xs sm:text-sm font-mono break-all">
-                      {proof.transactionHash}
-                    </code>
+                    <code className="code-block flex-1 text-emerald-200 text-xs sm:text-sm">{proof.transactionHash}</code>
                     <button
                       onClick={() => copyToClipboard(proof.transactionHash)}
-                      className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                      className="p-2 pill transition-colors"
                       title="Copy transaction hash"
                     >
                       <DocumentDuplicateIcon className="h-4 w-4 text-emerald-400" />
@@ -696,7 +690,7 @@ export default function UploadPage() {
                       href={getExplorerTxUrl(proof.transactionHash)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-full cta-dark"
                       title="Open in Basescan"
                     >
                       Open
@@ -707,22 +701,22 @@ export default function UploadPage() {
                 {/* Blockchain Details */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
+                    <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1">
                       Submitter
                     </label>
-                    <p className="text-gray-100 text-sm sm:text-base font-mono">{formatAddress(proof.submitter)}</p>
+                    <p className="text-slate-100 text-sm sm:text-base font-mono">{formatAddress(proof.submitter)}</p>
                   </div>
                   <div>
-                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
+                    <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1">
                       Timestamp
                     </label>
-                    <p className="text-gray-100 text-sm sm:text-base">{formatTimestamp(proof.timestamp)}</p>
+                    <p className="text-slate-100 text-sm sm:text-base">{formatTimestamp(proof.timestamp)}</p>
                   </div>
                 </div>
 
                 {/* Status */}
                 <div>
-                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
+                  <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1">
                     Authenticity Status
                   </label>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
@@ -734,13 +728,13 @@ export default function UploadPage() {
                 <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-2">
                   <button
                     onClick={() => setProof(null)}
-                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 transition-colors text-center"
+                    className="px-4 py-2 pill transition-colors text-center"
                   >
                     Take Another Photo
                   </button>
                   <Link
                     href="/verify"
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white transition-colors text-center"
+                    className="px-4 py-2 cta-dark text-white transition-colors text-center"
                   >
                     Verify an Image
                   </Link>

@@ -108,29 +108,27 @@ export default function VerifyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
-      <div className="container mx-auto px-4 py-6 sm:py-10">
+    <div className="min-h-screen bg-hero-dark">
+      <div className="page-container mx-auto max-w-5xl py-8 sm:py-12">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 sm:mb-10">
+        <div className="flex items-center justify-between mb-8 sm:mb-12">
           <Link
             href="/"
-            className="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
+            className="flex items-center text-cyan-300 hover:text-cyan-200 transition-colors"
           >
             <ArrowLeftIcon className="h-5 w-5 mr-2" />
             <span className="hidden sm:inline">Back to Home</span>
             <span className="sm:hidden">Back</span>
           </Link>
           <div className="flex items-center gap-4">
-            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-              Research Prototype
-            </span>
+            <span className="pill px-2.5 py-1 text-xs">Research Prototype</span>
             <WalletConnect />
           </div>
         </div>
 
         <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">Verify Image</h1>
-          <p className="mt-3 text-sm sm:text-base text-gray-300">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-slate-100">Verify Image</h1>
+          <p className="mt-3 text-sm sm:text-base text-slate-300">
             Upload an image to verify its authenticity against blockchain proofs.
           </p>
           <div className="mt-4">
@@ -148,9 +146,9 @@ export default function VerifyPage() {
 
           {/* Upload Area */}
           <div
-            className={`relative overflow-hidden rounded-2xl border-2 border-dashed transition-colors ${
+            className={`relative overflow-hidden rounded-[16px] border-2 border-dashed transition-colors ${
               isDragging
-                ? 'border-blue-400 bg-blue-500/5'
+                ? 'border-emerald-400/40 bg-emerald-500/5'
                 : 'border-white/20 bg-white/5'
             } backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-8 sm:p-12`}
             onDragOver={handleDragOver}
@@ -158,11 +156,11 @@ export default function VerifyPage() {
             onDrop={handleDrop}
           >
             <div className="text-center">
-              <DocumentMagnifyingGlassIcon className="h-16 w-16 sm:h-20 sm:w-20 text-emerald-400/90 mx-auto mb-5" />
-              <h3 className="text-xl sm:text-2xl font-medium text-white mb-2">
+              <DocumentMagnifyingGlassIcon className="h-16 w-16 sm:h-20 sm:w-20 text-emerald-300 mx-auto mb-5" />
+              <h3 className="text-xl sm:text-2xl font-medium text-slate-100 mb-2">
                 Verify Image Authenticity
               </h3>
-              <p className="text-gray-300/90 mb-6 text-sm sm:text-base">
+              <p className="text-slate-300/90 mb-6 text-sm sm:text-base">
                 Drag and drop an image here, or click to select a file to verify against blockchain proofs.
               </p>
               
@@ -175,7 +173,7 @@ export default function VerifyPage() {
               />
               <label
                 htmlFor="file-input"
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 sm:px-8 py-3 text-white font-medium shadow-lg shadow-emerald-900/40 hover:from-emerald-400 hover:to-teal-500 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 cta-dark px-6 sm:px-8 py-3 text-sm cursor-pointer"
               >
                 <DocumentMagnifyingGlassIcon className="h-5 w-5" />
                 Select Image to Verify
@@ -204,13 +202,13 @@ export default function VerifyPage() {
           {(isProcessing || isBlockchainLoading) && (
             <div className="text-center py-8">
               <div className="h-10 w-10 sm:h-12 sm:w-12 animate-spin rounded-full border-2 border-white/20 border-t-white mb-4 mx-auto"></div>
-              <p className="text-gray-300 text-sm sm:text-base">Verifying image on blockchain...</p>
+              <p className="text-slate-300 text-sm sm:text-base">Verifying image on blockchain...</p>
             </div>
           )}
 
           {/* Verification Result */}
           {result && (
-            <div className={`relative overflow-hidden rounded-2xl border backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8 ${
+            <div className={`relative overflow-hidden rounded-[16px] border backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8 ${
               result.isAuthentic
                 ? 'border-emerald-500/20 bg-emerald-500/5'
                 : 'border-red-500/20 bg-red-500/5'
@@ -245,11 +243,9 @@ export default function VerifyPage() {
 
                   {/* Image Hash */}
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-300 mb-1">Image Hash (SHA-256)</label>
-                    <code className={`block px-3 py-2 rounded-lg text-xs sm:text-sm font-mono break-all border ${
-                      result.isAuthentic
-                        ? 'bg-black/20 border-emerald-500/20 text-emerald-200'
-                        : 'bg-black/20 border-red-500/20 text-red-200'
+                    <label className="block text-sm font-medium text-slate-300 mb-1">Image Hash (SHA-256)</label>
+                    <code className={`code-block block text-xs sm:text-sm ${
+                      result.isAuthentic ? 'text-emerald-200' : 'text-red-200'
                     }`}>
                       {result.hash}
                     </code>
@@ -261,13 +257,13 @@ export default function VerifyPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-emerald-300 mb-1">Submitter</label>
-                          <div className="px-3 py-2 bg-black/20 border border-emerald-500/20 rounded-lg text-emerald-200 text-xs sm:text-sm font-mono">
+                          <div className="code-block text-emerald-200 text-xs sm:text-sm font-mono">
                             {formatAddress(result.proof.submitter)}
                           </div>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-emerald-300 mb-1">Timestamp</label>
-                          <div className="px-3 py-2 bg-black/20 border border-emerald-500/20 rounded-lg text-emerald-200 text-xs sm:text-sm">
+                          <div className="code-block text-emerald-200 text-xs sm:text-sm">
                             {formatTimestamp(result.proof.timestamp)}
                           </div>
                         </div>
@@ -282,7 +278,7 @@ export default function VerifyPage() {
                         setResult(null);
                         setError(null);
                       }}
-                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 hover:bg-white/15 text-white px-4 py-2 border border-white/10"
+                      className="inline-flex items-center justify-center gap-2 pill px-4 py-2"
                     >
                       Verify Another Image
                     </button>

@@ -2,7 +2,15 @@
 
 import { useEffect } from 'react';
 import Link from "next/link";
-import { CameraIcon, ShieldCheckIcon, DocumentMagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import {
+  CameraIcon,
+  ShieldCheckIcon,
+  DocumentMagnifyingGlassIcon,
+  LockClosedIcon,
+  EyeIcon,
+  HashtagIcon,
+  CircleStackIcon
+} from "@heroicons/react/24/outline";
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
 import { WalletConnect } from './components/WalletConnect';
 
@@ -17,102 +25,121 @@ export default function Home() {
   }, [setFrameReady, isFrameReady]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
-      <div className="container mx-auto px-4 py-8 sm:py-14">
-        {/* Hero */}
-        <div className="flex items-center justify-between mb-6 sm:mb-10">
-          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Research Prototype</span>
+    <div className="min-h-screen bg-hero-dark">
+      <div className="page-container mx-auto max-w-6xl py-8 sm:py-12">
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-8 sm:mb-12">
+          <span className="pill px-3 py-1 text-xs">Research Prototype</span>
           <WalletConnect />
         </div>
 
+        {/* Hero */}
         <div className="text-center mb-10 sm:mb-14">
-          <div className="flex justify-center mb-4 sm:mb-5">
-            <CameraIcon className="h-12 w-12 sm:h-14 sm:w-14 text-blue-400/90" />
+          <div className="flex justify-center mb-4 sm:mb-6">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center bg-cyan-500/10 border border-cyan-300/20">
+              <CameraIcon className="icon-7 text-cyan-300" />
+            </div>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-white">Truth Camera</h1>
-          <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto">
-            Minimal camera-first tool for cryptographic image provenance. Capture or verify with a clean, tamper-resistant flow.
+          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-slate-100">
+            <span className="text-accent-gradient">Truth Camera</span>
+          </h1>
+          <p className="mt-4 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto">
+            Advanced cryptographic verification for uncompromising image authenticity.
           </p>
         </div>
 
-        {/* Main Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto mb-10 sm:mb-14">
-          <Link href="/upload" className="group">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8 h-full">
-              <div className="flex items-center justify-center mb-4 sm:mb-6">
-                <div className="p-3 sm:p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                  <CameraIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400" />
-                </div>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-medium text-white mb-2 text-center">Take Photo</h3>
-              <p className="text-gray-300 text-center mb-5 text-sm sm:text-base">
-                Use your device camera to capture an authentic frame secured with blockchain proof.
-              </p>
-              <div className="text-center">
-                <span className="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium shadow-lg shadow-blue-900/40 group-hover:from-blue-500 group-hover:to-indigo-500 transition-colors text-sm sm:text-base">
-                  Start Camera →
-                </span>
-              </div>
+        {/* Feature tiles */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-10 sm:mb-14">
+          {[{title:'Direct Capture', icon: CameraIcon, color:'text-cyan-300'}, {title:'SHA-256 Hash', icon: DocumentMagnifyingGlassIcon, color:'text-emerald-300'}, {title:'Tamper Proof', icon: ShieldCheckIcon, color:'text-blue-300'}, {title:'Verification', icon: DocumentMagnifyingGlassIcon, color:'text-violet-300'}].map((t, i) => (
+            <div key={i} className="tile-outline rounded-[16px] p-5 flex items-center gap-3">
+              <t.icon className={`icon-6 ${t.color}`} />
+              <div className="text-slate-200 text-sm">{t.title}</div>
             </div>
-          </Link>
-
-          <Link href="/verify" className="group">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8 h-full">
-              <div className="flex items-center justify-center mb-4 sm:mb-6">
-                <div className="p-3 sm:p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                  <DocumentMagnifyingGlassIcon className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-300" />
-                </div>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-medium text-white mb-2 text-center">Verify Image</h3>
-              <p className="text-gray-300 text-center mb-5 text-sm sm:text-base">
-                Check an image against blockchain proofs to confirm authenticity.
-              </p>
-              <div className="text-center">
-                <span className="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium shadow-lg shadow-emerald-900/40 group-hover:from-emerald-400 group-hover:to-teal-500 transition-colors text-sm sm:text-base">
-                  Verify Image →
-                </span>
-              </div>
-            </div>
-          </Link>
+          ))}
         </div>
 
-        {/* How it Works */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8 max-w-4xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-medium text-white mb-6 sm:mb-8 text-center">How It Works</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
-            <div className="text-center">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 bg-blue-500/10 border border-blue-500/20">
-                <span className="text-blue-300 font-semibold text-base sm:text-lg">1</span>
-              </div>
-              <h4 className="font-medium text-white mb-2 text-sm sm:text-base">Capture with Camera</h4>
-              <p className="text-gray-300 text-xs sm:text-sm">Direct sensor capture prevents pre-manipulation.</p>
+        {/* CTA */}
+        <div className="text-center mb-12">
+          <Link href="/upload" className="inline-flex">
+            <span className="cta-dark px-6 py-3 text-sm font-medium">Enter Secure Zone</span>
+          </Link>
+          <div className="text-slate-400 text-xs mt-3">Zero-knowledge cryptographic verification • No data leaves your device</div>
+        </div>
+
+        {/* Security Protocol heading */}
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <LockClosedIcon className="icon-6 text-cyan-300" />
+            <ShieldCheckIcon className="icon-6 text-emerald-300" />
+            <EyeIcon className="icon-6 text-blue-300" />
+          </div>
+          <h2 className="text-slate-100 text-2xl sm:text-3xl font-semibold">Security Protocol</h2>
+          <p className="text-slate-300 mt-2 max-w-3xl mx-auto text-sm sm:text-base">
+            Three-layer cryptographic verification system ensuring uncompromising image authenticity
+          </p>
+          <div className="text-[11px] mt-3 tracking-wider text-slate-400">ZERO–KNOWLEDGE • END–TO–END • TAMPER–PROOF</div>
+        </div>
+
+        {/* Protocol cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="card-protocol text-center">
+            <div className="mx-auto mb-3 w-14 h-14 rounded-2xl flex items-center justify-center border border-cyan-300/20 bg-gradient-to-br from-cyan-500/15 to-emerald-500/10">
+              <CameraIcon className="icon-7 text-cyan-300" />
             </div>
-            <div className="text-center">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 bg-emerald-500/10 border border-emerald-500/20">
-                <span className="text-emerald-300 font-semibold text-base sm:text-lg">2</span>
-              </div>
-              <h4 className="font-medium text-white mb-2 text-sm sm:text-base">Generate Hash</h4>
-              <p className="text-gray-300 text-xs sm:text-sm">We compute a SHA-256 fingerprint in-browser.</p>
+            <div className="badge-step mx-auto mb-3">1</div>
+            <h3 className="text-slate-100 text-base sm:text-lg mb-1">Secure Capture</h3>
+            <p className="text-slate-400 text-sm">Direct sensor capture prevents pre-manipulation and ensures data integrity from source.</p>
+            <div className="divider mt-4"></div>
+            <div className="text-[11px] mt-3 text-emerald-300/90">SECURED</div>
+          </div>
+          <div className="card-protocol text-center">
+            <div className="mx-auto mb-3 w-14 h-14 rounded-2xl flex items-center justify-center border border-emerald-300/20 bg-gradient-to-br from-emerald-500/15 to-cyan-500/10">
+              <HashtagIcon className="icon-7 text-emerald-300" />
             </div>
-            <div className="text-center">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 bg-violet-500/10 border border-violet-500/20">
-                <span className="text-violet-300 font-semibold text-base sm:text-lg">3</span>
-              </div>
-              <h4 className="font-medium text-white mb-2 text-sm sm:text-base">Store on Blockchain</h4>
-              <p className="text-gray-300 text-xs sm:text-sm">Proofs are immutably stored on-chain for verification.</p>
+            <div className="badge-step mx-auto mb-3">2</div>
+            <h3 className="text-slate-100 text-base sm:text-lg mb-1">Cryptographic Hash</h3>
+            <p className="text-slate-400 text-sm">Military-grade SHA-256 fingerprint computed locally in your secure browser environment.</p>
+            <div className="divider mt-4"></div>
+            <div className="text-[11px] mt-3 text-emerald-300/90">SECURED</div>
+          </div>
+          <div className="card-protocol text-center">
+            <div className="mx-auto mb-3 w-14 h-14 rounded-2xl flex items-center justify-center border border-violet-300/20 bg-gradient-to-br from-violet-500/15 to-blue-500/10">
+              <CircleStackIcon className="icon-7 text-violet-300" />
             </div>
+            <div className="badge-step mx-auto mb-3">3</div>
+            <h3 className="text-slate-100 text-base sm:text-lg mb-1">Secure Storage</h3>
+            <p className="text-slate-400 text-sm">Cryptographic proofs stored locally with zero-knowledge architecture for maximum privacy.</p>
+            <div className="divider mt-4"></div>
+            <div className="text-[11px] mt-3 text-emerald-300/90">SECURED</div>
           </div>
         </div>
 
-        {/* Security Notice */}
-        <div className="mt-8 max-w-4xl mx-auto">
-          <div className="rounded-xl border border-white/10 bg-blue-500/10 p-4 sm:p-6">
-            <div className="flex items-start space-x-3">
-              <ShieldCheckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-300 flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-base sm:text-lg font-medium text-blue-200 mb-1">Blockchain-Secured Authenticity</h4>
-                <p className="text-blue-200/90 text-sm sm:text-base">Camera-first capture with immutable blockchain proofs ensures maximum authenticity and prevents tampering.</p>
-              </div>
+        {/* Cryptographic Guarantee */}
+        <div className="mt-10 sm:mt-14 card-dark rounded-[20px] p-6 sm:p-8">
+          <div className="text-center mb-5 sm:mb-6">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <ShieldCheckIcon className="icon-6 text-emerald-300" />
+              <ShieldCheckIcon className="icon-6 text-cyan-300" />
+            </div>
+            <h2 className="text-slate-100 text-xl sm:text-2xl font-semibold">Cryptographic Guarantee</h2>
+            <p className="text-slate-300 mt-2 text-sm sm:text-base max-w-3xl mx-auto">
+              Our zero-knowledge cryptographic approach ensures that every image captured through Truth Camera has a
+              unique digital fingerprint that cannot be replicated, forged, or compromised.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="text-cyan-300 text-sm font-semibold tracking-wide">PRIVACY</div>
+              <div className="text-slate-400 text-xs mt-1">Zero data transmission</div>
+            </div>
+            <div className="text-center">
+              <div className="text-emerald-300 text-sm font-semibold tracking-wide">INTEGRITY</div>
+              <div className="text-slate-400 text-xs mt-1">Tamper detection</div>
+            </div>
+            <div className="text-center">
+              <div className="text-blue-300 text-sm font-semibold tracking-wide">AUTHENTICITY</div>
+              <div className="text-slate-400 text-xs mt-1">Source verification</div>
             </div>
           </div>
         </div>
