@@ -11,6 +11,7 @@
   "dependencies": {
     "@coinbase/onchainkit": "^0.38.19",
     "@heroicons/react": "^2.2.0",
+    "@privy-io/react-auth": "^2.21.2",
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.84.2",
     "ethers": "^6.15.0",

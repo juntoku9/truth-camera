@@ -1,31 +1,21 @@
 'use client';
 
-import '@rainbow-me/rainbowkit/styles.css';
-import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import { WagmiProvider } from 'wagmi';
-import { base } from 'wagmi/chains';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-
-const baseConfig = getDefaultConfig({
-  appName: 'Truth Camera',
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'your-project-id',
-  chains: [base],
-  ssr: true,
-});
-
-// Disable autoConnect so users only connect when they click the button
-const config = { ...baseConfig, autoConnect: false } as typeof baseConfig;
-
-const queryClient = new QueryClient();
+import { PrivyProvider } from '@privy-io/react-auth';
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
+  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'your-privy-app-id';
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider initialChain={base}>
-          {children}
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <PrivyProvider
+      appId={appId}
+      config={{
+        loginMethods: ['email', 'wallet'],
+        appearance: { theme: 'dark' },
+        embeddedWallets: {
+          ethereum: { createOnLogin: 'users-without-wallets' },
+        },
+      }}
+    >
+      {children}
+    </PrivyProvider>
   );
 } 
