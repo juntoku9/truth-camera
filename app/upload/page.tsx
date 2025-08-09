@@ -474,12 +474,6 @@ export default function UploadPage() {
         </div>
 
         <div className="max-w-3xl mx-auto space-y-6">
-          {/* Contract Info */}
-          {isContractReady() && (
-            <div className="text-center text-xs text-gray-400">
-              Contract: {formatAddress(getContractAddress())}
-            </div>
-          )}
           {!proof ? (
             <>
               {/* Idle State */}
