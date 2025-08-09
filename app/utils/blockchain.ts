@@ -176,4 +176,10 @@ export function formatAddress(address: string): string {
 // Convert timestamp to readable date
 export function formatTimestamp(timestamp: number): string {
   return new Date(timestamp * 1000).toLocaleString();
+}
+
+// Build a Basescan URL for a transaction hash (defaults to Base mainnet)
+export function getExplorerTxUrl(txHash: string): string {
+  const baseUrl = process.env.NEXT_PUBLIC_BASESCAN_URL || 'https://basescan.org';
+  return `${baseUrl}/tx/${txHash}`;
 } 

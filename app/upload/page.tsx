@@ -6,7 +6,7 @@ import { ArrowLeftIcon, CameraIcon, CheckCircleIcon, DocumentDuplicateIcon, Phot
 import { hashImageFile } from '../utils/crypto';
 import { useBlockchain } from '../hooks/useBlockchain';
 import { WalletConnect, WalletStatus } from '../components/WalletConnect';
-import { formatAddress, formatTimestamp } from '../utils/blockchain';
+import { formatAddress, formatTimestamp, getExplorerTxUrl } from '../utils/blockchain';
 
 interface BlockchainProofResult {
   hash: string;
@@ -660,7 +660,7 @@ export default function UploadPage() {
               <div className="flex items-center mb-6">
                 <CheckCircleIcon className="h-6 w-6 sm:h-7 sm:w-7 text-emerald-400 mr-3" />
                 <h2 className="text-xl sm:text-2xl font-medium text-white">
-                  Authentic Photo Verified
+                  Authentic Photo Proof Generated
                 </h2>
               </div>
 
@@ -686,20 +686,27 @@ export default function UploadPage() {
 
                 {/* Transaction Hash */}
                 <div>
-                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
-                    Transaction Hash
-                  </label>
-                  <div className="flex items-center space-x-2">
-                    <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">
+                  <label className="block text-sm font-medium text-emerald-300 mb-1">Transaction Hash</label>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 px-3 py-2 bg-black/20 border border-emerald-500/20 rounded-lg text-emerald-200 text-xs sm:text-sm font-mono break-all">
                       {proof.transactionHash}
                     </code>
                     <button
                       onClick={() => copyToClipboard(proof.transactionHash)}
-                      className="flex-shrink-0 p-2 text-gray-300 hover:text-white"
+                      className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors"
                       title="Copy transaction hash"
                     >
-                      <DocumentDuplicateIcon className="h-5 w-5" />
+                      <DocumentDuplicateIcon className="h-4 w-4 text-emerald-400" />
                     </button>
+                    <a
+                      href={getExplorerTxUrl(proof.transactionHash)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white"
+                      title="Open in Basescan"
+                    >
+                      Open
+                    </a>
                   </div>
                 </div>
 
@@ -727,25 +734,6 @@ export default function UploadPage() {
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
                     Blockchain Verified ✓
                   </span>
-                </div>
-
-                {/* Verification URL */}
-                <div>
-                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
-                    Verification Link
-                  </label>
-                  <div className="flex items-center space-x-2">
-                    <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">
-                      {typeof window !== 'undefined' ? `${window.location.origin}/verify/${proof.hash}` : ''}
-                    </code>
-                    <button
-                      onClick={() => copyToClipboard(`${typeof window !== 'undefined' ? window.location.origin : ''}/verify/${proof.hash}`)}
-                      className="flex-shrink-0 p-2 text-gray-300 hover:text-white"
-                      title="Copy verification link"
-                    >
-                      <DocumentDuplicateIcon className="h-5 w-5" />
-                    </button>
-                  </div>
                 </div>
 
                 {/* Actions */}
