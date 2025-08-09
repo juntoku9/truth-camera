@@ -54,23 +54,7 @@ export default function UploadPage() {
       
       streamRef.current = stream;
       
-      if (videoRef.current) {
-        console.log('Setting video source...');
-        videoRef.current.srcObject = stream;
-        videoRef.current.setAttribute('playsinline', 'true');
-        videoRef.current.muted = true;
-        videoRef.current.autoplay = true;
-        
-        // Simple play attempt
-        try {
-          await videoRef.current.play();
-          console.log('Video playing');
-        } catch (playError) {
-          console.warn('Play failed, but continuing:', playError);
-        }
-      }
-      
-      // Set camera as active
+      // Mark camera as active so the <video> mounts, then an effect will attach the stream
       setIsCameraActive(true);
       setError(null);
       setCameraError(null);
@@ -95,6 +79,28 @@ export default function UploadPage() {
       setIsCameraActive(false);
     }
   }, []);
+
+  // Attach stream to video element after it mounts to ensure preview is visible
+  useEffect(() => {
+    const attach = async () => {
+      const video = videoRef.current;
+      const stream = streamRef.current;
+      if (!isCameraActive || !video || !stream) return;
+      try {
+        console.log('Attaching stream to video...');
+        video.srcObject = stream;
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('muted', 'true');
+        video.setAttribute('autoplay', 'true');
+        video.muted = true;
+        await video.play().catch((e) => console.warn('Video play warning:', e));
+        console.log('Video preview should be visible now');
+      } catch (e) {
+        console.warn('Failed to attach stream to video:', e);
+      }
+    };
+    attach();
+  }, [isCameraActive]);
 
   // Auto-start camera when component mounts
   useEffect(() => {
