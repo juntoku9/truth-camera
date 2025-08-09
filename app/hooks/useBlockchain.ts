@@ -105,25 +105,6 @@ export function useBlockchain() {
     const ok = await ensureBase();
     if (!ok) throw new Error('Please switch your wallet to Base.');
 
-    // Debug + existence check for contract
-    try {
-      console.log('[SubmitProof] chainId=', currentChainId, 'address=', address);
-      console.log('[SubmitProof] configured contract address=', TRUTH_CAMERA_CONTRACT_ADDRESS);
-      if (typeof window !== 'undefined' && (window as any).ethereum && TRUTH_CAMERA_CONTRACT_ADDRESS) {
-        const provider = new ethers.BrowserProvider((window as any).ethereum);
-        const code = await provider.getCode(TRUTH_CAMERA_CONTRACT_ADDRESS);
-        console.log('[SubmitProof] bytecode length=', code?.length || 0);
-        if (!code || code === '0x') {
-          const msg = 'Contract not found at configured address on Base. Please check NEXT_PUBLIC_TRUTH_CAMERA_CONTRACT_ADDRESS.';
-          console.error('[SubmitProof] ' + msg);
-          throw new Error(msg);
-        }
-      }
-    } catch (existErr: any) {
-      setError(existErr?.message || 'Failed to verify contract deployment.');
-      throw existErr;
-    }
-
     setIsLoading(true);
     setError(null);
 
