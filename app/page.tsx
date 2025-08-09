@@ -60,7 +60,7 @@ export default function Home() {
 
         {/* CTA */}
         <div className="text-center mb-12">
-          <Link href="/upload" className="inline-flex">
+          <Link href="/start" className="inline-flex">
             <span className="cta-dark px-6 py-3 text-sm font-medium">Enter Secure Zone</span>
           </Link>
           <div className="text-slate-400 text-xs mt-3">Zero-knowledge cryptographic verification • No data leaves your device</div>
