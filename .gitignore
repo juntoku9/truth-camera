@@ -39,3 +39,21 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Solidity/Hardhat
+base-solidity/node_modules/
+base-solidity/cache/
+base-solidity/artifacts/
+base-solidity/deployments/
+base-solidity/.env
+base-solidity/.env.local
+base-solidity/.env.production
+base-solidity/.env.staging
+base-solidity/coverage/
+base-solidity/coverage.json
+base-solidity/typechain/
+base-solidity/typechain-types/
+base-solidity/.openzeppelin/
+base-solidity/.solhint.json
+base-solidity/gas-report.txt
+base-solidity/contracts/.DS_Store
