@@ -247,16 +247,54 @@ export default function UploadPage() {
     }
   }, [stopCamera]);
 
-  const downloadImage = useCallback(() => {
+  function isIOS(): boolean {
+    if (typeof navigator === 'undefined') return false;
+    const userAgent = navigator.userAgent || (navigator as any).vendor || '';
+    const isAppleTouchDevice = navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1;
+    return /iPad|iPhone|iPod/.test(userAgent) || isAppleTouchDevice;
+  }
+
+  function dataUrlToBlob(dataUrl: string): Blob {
+    const [header, data] = dataUrl.split(',');
+    const mimeMatch = header.match(/data:(.*?);base64/);
+    const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const byteString = atob(data);
+    const byteNumbers = new Array(byteString.length);
+    for (let i = 0; i < byteString.length; i++) {
+      byteNumbers[i] = byteString.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mime });
+  }
+
+  const downloadImage = useCallback(async () => {
     if (!capturedImage) return;
 
-    // Create download link
+    const filename = `truth-camera-${new Date().toISOString().split('T')[0]}-${Date.now()}.jpg`;
+    const blob = dataUrlToBlob(capturedImage);
+    const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Truth Camera', text: 'Captured with Truth Camera' });
+        return;
+      }
+    } catch {
+      // Ignore and fall through to link-based download
+    }
+
+    const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.download = `truth-camera-${new Date().toISOString().split('T')[0]}-${Date.now()}.jpg`;
-    link.href = capturedImage;
+    link.href = objectUrl;
+    link.download = filename;
+    if (isIOS()) {
+      link.target = '_blank';
+      link.rel = 'noopener';
+    }
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
   }, [capturedImage]);
 
   const convertDataUrlToFile = (dataUrl: string, filename: string): File => {
