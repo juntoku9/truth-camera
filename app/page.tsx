@@ -1,7 +1,20 @@
+'use client';
+
+import { useEffect } from 'react';
 import Link from "next/link";
 import { CameraIcon, ShieldCheckIcon, DocumentMagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { useMiniKit } from '@coinbase/onchainkit/minikit';
 
 export default function Home() {
+  const { setFrameReady, isFrameReady } = useMiniKit();
+
+  // The setFrameReady() function is called when your mini-app is ready to be shown
+  useEffect(() => {
+    if (!isFrameReady) {
+      setFrameReady();
+    }
+  }, [setFrameReady, isFrameReady]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
       <div className="container mx-auto px-4 py-8 sm:py-14">
