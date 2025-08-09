@@ -12,12 +12,11 @@ export default function UploadPage() {
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
-  const [captureLog, setCaptureLog] = useState<string>('');
-  const [videoDebug, setVideoDebug] = useState<{readyState:number; vw:number; vh:number; track?:string}>({readyState: -1, vw: 0, vh: 0});
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   // Clean up camera stream when component unmounts
   useEffect(() => {
@@ -37,23 +36,6 @@ export default function UploadPage() {
       console.log('Captured image state cleared');
     }
   }, [capturedImage]);
-
-  // Live debug for video/track state
-  useEffect(() => {
-    if (!isCameraActive) return;
-    const id = setInterval(() => {
-      const v = videoRef.current;
-      const s = streamRef.current;
-      const track = s?.getVideoTracks?.()[0];
-      setVideoDebug({
-        readyState: v ? v.readyState : -1,
-        vw: v?.videoWidth || 0,
-        vh: v?.videoHeight || 0,
-        track: track ? `${track.readyState}${track.muted ? ' (muted)' : ''}` : 'none',
-      });
-    }, 500);
-    return () => clearInterval(id);
-  }, [isCameraActive]);
 
   const startCamera = useCallback(async () => {
     setCameraError(null);
@@ -147,15 +129,12 @@ export default function UploadPage() {
   const capturePhoto = useCallback(async () => {
     try {
       setError(null);
-      setCaptureLog('');
-      setCaptureLog('capture clicked');
 
       const canvas = canvasRef.current;
       const video = videoRef.current;
 
       if (!canvas) {
         setError('Internal error: canvas not ready.');
-        setCaptureLog('Canvas not ready');
         return;
       }
 
@@ -171,8 +150,6 @@ export default function UploadPage() {
               const imageCapture = new ImageCaptureCtor(track);
               // Try takePhoto first (Blob), then fall back to grabFrame
               if (imageCapture.takePhoto) {
-                setCaptureLog('Using ImageCapture.takePhoto');
-                console.log('Using ImageCapture.takePhoto');
                 let blob: Blob | null = null;
                 try {
                   blob = await withTimeout<Blob>(imageCapture.takePhoto(), 1500, 'takePhoto');
@@ -186,16 +163,16 @@ export default function UploadPage() {
                     reader.onerror = reject;
                     reader.readAsDataURL(blob);
                   });
-                  console.log('Captured (takePhoto) size:', Math.round(dataUrl.length / 1024), 'KB');
-                  setCaptureLog(`takePhoto OK (${Math.round(dataUrl.length / 1024)} KB)`);
                   setCapturedImage(dataUrl);
+                  // Bring preview into view and ensure render
+                  setTimeout(() => {
+                    previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 0);
                   stopCamera({ clearPhoto: false });
                   return;
                 }
               }
 
-              setCaptureLog('Using ImageCapture.grabFrame');
-              console.log('Using ImageCapture.grabFrame');
               const bitmap: ImageBitmap = await withTimeout(imageCapture.grabFrame(), 1500, 'grabFrame');
 
               canvas.width = bitmap.width;
@@ -203,28 +180,25 @@ export default function UploadPage() {
               const ctx = canvas.getContext('2d');
               if (!ctx) {
                 setError('Unable to process image. Please try again.');
-                setCaptureLog('No 2D context');
                 return;
               }
               ctx.drawImage(bitmap, 0, 0);
               const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-              console.log('Captured (ImageCapture) size:', Math.round(imageDataUrl.length / 1024), 'KB');
               if (!imageDataUrl.startsWith('data:image/')) {
                 setError('Failed to capture image data.');
-                setCaptureLog('Invalid data from grabFrame');
                 return;
               }
               setCapturedImage(imageDataUrl);
-              setCaptureLog(`grabFrame OK (${Math.round(imageDataUrl.length / 1024)} KB)`);
+              // Bring preview into view and ensure render
+              setTimeout(() => {
+                previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 0);
               stopCamera({ clearPhoto: false });
               return;
             } else {
-              console.log('ImageCapture API not available; falling back to canvas draw from <video>.');
-              setCaptureLog('ImageCapture not available');
             }
           } catch (icErr) {
             console.warn('ImageCapture failed, falling back to canvas draw:', icErr);
-            setCaptureLog(`ImageCapture error: ${icErr instanceof Error ? icErr.message : String(icErr)}`);
           }
         }
       }
@@ -232,13 +206,11 @@ export default function UploadPage() {
       // Fallback: draw from <video>
       if (!video) {
         setError('Camera not ready. Please try again.');
-        setCaptureLog('No video element');
         return;
       }
 
       // Ensure the video has current data
       if (video.readyState < 2) {
-        console.log('Video not ready (readyState:', video.readyState, ') attempting to play...');
         try { await video.play(); } catch {}
         // Wait briefly for a frame
         await new Promise(res => setTimeout(res, 200));
@@ -246,11 +218,9 @@ export default function UploadPage() {
 
       const width = video.videoWidth || video.clientWidth || 640;
       const height = video.videoHeight || video.clientHeight || 480;
-      console.log('Fallback capture from <video> at', width, 'x', height);
 
       if (width <= 0 || height <= 0) {
         setError('Invalid camera dimensions. Please refresh camera.');
-        setCaptureLog(`Invalid dimensions ${width}x${height}`);
         return;
       }
 
@@ -259,24 +229,21 @@ export default function UploadPage() {
       const context = canvas.getContext('2d');
       if (!context) {
         setError('Unable to process image. Please try again.');
-        setCaptureLog('No 2D context fallback');
         return;
       }
       context.drawImage(video, 0, 0, width, height);
       const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-      console.log('Captured (fallback) size:', Math.round(imageDataUrl.length / 1024), 'KB');
       if (!imageDataUrl.startsWith('data:image/')) {
         setError('Failed to capture image data.');
-        setCaptureLog('Invalid data from fallback');
         return;
       }
       setCapturedImage(imageDataUrl);
-      setCaptureLog(`fallback OK (${Math.round(imageDataUrl.length / 1024)} KB)`);
+      setTimeout(() => {
+        previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 0);
       stopCamera({ clearPhoto: false });
     } catch (err) {
-      console.error('Error during photo capture:', err);
       setError(`Capture failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      setCaptureLog(`Error: ${err instanceof Error ? err.message : String(err)}`);
     }
   }, [stopCamera]);
 
@@ -370,166 +337,117 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-4 sm:py-8">
-        {/* Header */}
-        <div className="flex items-center mb-6 sm:mb-8">
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
+      <div className="container mx-auto px-4 py-6 sm:py-10">
+        {/* Hero Header */}
+        <div className="flex items-center justify-between mb-6 sm:mb-10">
           <Link
             href="/"
-            className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mr-4"
+            className="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
           >
             <ArrowLeftIcon className="h-5 w-5 mr-2" />
             <span className="hidden sm:inline">Back to Home</span>
             <span className="sm:hidden">Back</span>
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-            Take Authentic Photo
-          </h1>
+          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+            Research Prototype
+          </span>
         </div>
 
-        <div className="max-w-2xl mx-auto">
-          {/* Debug Info */}
-          <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm">
-            <strong>Debug Info:</strong>
-            <div>Camera Active: {isCameraActive ? 'Yes' : 'No'}</div>
-            <div>Captured Image: {capturedImage ? `Yes (${Math.round(capturedImage.length / 1024)}KB)` : 'No'}</div>
-            <div>Processing: {isProcessing ? 'Yes' : 'No'}</div>
-            <div>Proof Generated: {proof ? 'Yes' : 'No'}</div>
-            <div>Error: {error || 'None'}</div>
-            <div>Camera Error: {cameraError || 'None'}</div>
-            {captureLog && <div>Capture: {captureLog}</div>}
-            <div>Video Debug: {JSON.stringify(videoDebug)}</div>
-          </div>
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">Truth Camera</h1>
+          <p className="mt-3 text-sm sm:text-base text-gray-300">
+            Minimal capture tool for cryptographic image provenance. Camera-only. No uploads.
+          </p>
+        </div>
 
+        <div className="max-w-3xl mx-auto space-y-6">
           {!proof ? (
             <>
-              {/* Camera Interface */}
+              {/* Idle State */}
               {!isCameraActive && !capturedImage && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 sm:p-8 shadow-lg border border-gray-200 dark:border-gray-700 mb-6">
+                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-8">
                   <div className="text-center">
-                    <CameraIcon className="h-16 w-16 sm:h-20 sm:w-20 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
-                    <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-2">
-                      Truth Camera - Direct Capture Only
+                    <CameraIcon className="h-16 w-16 sm:h-20 sm:w-20 text-blue-400/90 mx-auto mb-5" />
+                    <h3 className="text-xl sm:text-2xl font-medium text-white mb-2">
+                      Direct Capture Only
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm sm:text-base">
-                      Capture an authentic image directly from your camera. No file uploads allowed to ensure maximum security and prevent tampering.
+                    <p className="text-gray-300/90 mb-6 text-sm sm:text-base">
+                      Capture an authentic frame straight from your device sensor. No files, no drag-and-drop.
                     </p>
                     <button
                       onClick={startCamera}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 mx-auto text-lg"
+                      className="mx-auto inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 sm:px-8 py-3 text-white font-medium shadow-lg shadow-blue-900/40 hover:from-blue-500 hover:to-indigo-500 transition-colors"
                     >
-                      <CameraIcon className="h-6 w-6" />
+                      <CameraIcon className="h-5 w-5" />
                       Start Camera
                     </button>
-                    
-                    <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                      <p className="text-blue-800 dark:text-blue-200 text-sm">
-                        🔒 <strong>Security Note:</strong> This app only accepts direct camera capture to ensure image authenticity. 
-                        Pre-existing files cannot be uploaded to prevent manipulation.
-                      </p>
+                    <div className="mt-6 text-xs text-blue-300/80">
+                      This is a minimal, tamper-resistant capture flow.
                     </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Camera Error */}
-              {cameraError && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 mb-6">
-                  <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
-                    Camera Access Required
-                  </h3>
-                  <p className="text-red-600 dark:text-red-400 text-sm sm:text-base mb-4">
-                    {cameraError}
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button
-                      onClick={() => {
-                        setCameraError(null);
-                        startCamera();
-                      }}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                    >
-                      Try Camera Again
-                    </button>
-                    <button
-                      onClick={() => window.location.reload()}
-                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                    >
-                      Refresh Page
-                    </button>
-                  </div>
-                  
-                  <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                    <p className="text-yellow-800 dark:text-yellow-200 text-xs sm:text-sm">
-                      <strong>Need help?</strong> Make sure your browser has camera permissions enabled and no other apps are using your camera.
-                    </p>
                   </div>
                 </div>
               )}
 
               {/* Camera View */}
               {isCameraActive && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 mb-6">
+                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
                   <div className="relative">
-                    <video
-                      ref={videoRef}
-                      className="w-full h-64 sm:h-80 bg-gray-800 object-cover"
-                      playsInline
-                      muted
-                      autoPlay
-                      controls={false}
-                      style={{ minHeight: '200px', display: 'block' }}
-                    />
-                    <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-white/70 m-4 rounded-lg"></div>
-                    
-                    {/* Camera info overlay */}
-                    <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
+                    <div className="aspect-[16/10] w-full bg-black/70">
+                      <video
+                        ref={videoRef}
+                        className="h-full w-full object-cover rounded-t-2xl"
+                        playsInline
+                        muted
+                        autoPlay
+                        controls={false}
+                      />
+                    </div>
+                    {/* Subtle grid overlay */}
+                    <div className="pointer-events-none absolute inset-0 rounded-t-2xl bg-[radial-gradient(circle_at_center,transparent_0,transparent_60%,rgba(255,255,255,0.04)_100%)]" />
+                    <div className="absolute top-4 left-4 text-[11px] px-2 py-1 rounded-full bg-black/60 text-white/90 border border-white/10">
                       Camera Active
                     </div>
-                    
-                    {/* Refresh button overlay */}
                     <div className="absolute top-4 right-4">
                       <button
                         onClick={refreshVideo}
-                        className="bg-black/70 hover:bg-black/90 text-white p-2 rounded-lg transition-colors text-sm"
-                        title="Refresh video if black"
+                        className="text-xs px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white/90 border border-white/10"
+                        title="Refresh video"
                       >
-                        🔄 Refresh
+                        Refresh
                       </button>
                     </div>
                   </div>
-                  <div className="p-4">
-                    <p className="text-center text-gray-600 dark:text-gray-300 mb-4 text-sm">
-                      Position yourself in the frame and click capture when ready. If the video is black, click the refresh button above.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                      <button
-                        onClick={capturePhoto}
-                        className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-lg"
-                      >
-                        <PhotoIcon className="h-6 w-6" />
-                        Capture Photo
-                      </button>
-                      <button
-                        onClick={() => stopCamera({ clearPhoto: true })}
-                        className="flex-1 sm:flex-none bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                      >
-                        <XMarkIcon className="h-5 w-5" />
-                        Cancel
-                      </button>
-                    </div>
+
+                  {/* Sticky Action Bar */}
+                  <div className="flex items-center justify-center gap-3 p-4 border-t border-white/10 bg-gradient-to-b from-white/5 to-transparent">
+                    <button
+                      onClick={capturePhoto}
+                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-5 py-2.5 text-white font-medium shadow-lg shadow-indigo-900/40 hover:from-indigo-400 hover:to-violet-500 transition-colors text-base"
+                    >
+                      <PhotoIcon className="h-5 w-5" />
+                      Capture
+                    </button>
+                    <button
+                      onClick={() => stopCamera({ clearPhoto: true })}
+                      className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 text-white px-5 py-2.5 border border-white/10"
+                    >
+                      <XMarkIcon className="h-5 w-5" />
+                      Cancel
+                    </button>
                   </div>
                 </div>
               )}
 
               {/* Captured Image Preview */}
               {capturedImage && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 mb-6">
-                  <div className="relative group">
+                <div ref={previewRef} className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
+                  <div className="relative">
                     <img
                       src={capturedImage}
                       alt="Captured authentic photo"
-                      className="w-full h-64 sm:h-80 object-cover"
+                      className="w-full aspect-[16/10] object-cover rounded-t-2xl"
+                      key={capturedImage?.slice(0, 64)}
                       onLoad={() => console.log('Captured image loaded successfully')}
                       onError={(e) => {
                         console.error('Error loading captured image:', e);
@@ -537,67 +455,55 @@ export default function UploadPage() {
                         console.error('Image src preview:', capturedImage?.substring(0, 100));
                       }}
                     />
-                    {/* Image info overlay */}
-                    <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-lg text-sm">
-                      Authentic Photo Captured
+                    <div className="pointer-events-none absolute inset-0 rounded-t-2xl bg-[radial-gradient(circle_at_center,transparent_0,transparent_60%,rgba(255,255,255,0.04)_100%)]" />
+                    <div className="absolute top-4 left-4 text-[11px] px-2 py-1 rounded-full bg-black/60 text-white/90 border border-white/10">
+                      Authentic Frame
                     </div>
-                    {/* Download overlay button */}
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-4 right-4 flex gap-2">
                       <button
                         onClick={downloadImage}
-                        className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-colors"
+                        className="p-2 rounded-lg bg-white/10 hover:bg-white/15 text-white border border-white/10"
                         title="Download image"
                       >
                         <ArrowDownTrayIcon className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">
-                      Review Your Authentic Photo
-                    </h3>
-                    
-                    {/* Image details */}
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4 text-sm">
-                      <div className="grid grid-cols-2 gap-2 text-center">
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400 block">Captured</span>
-                          <span className="text-gray-900 dark:text-white font-medium">
-                            {new Date().toLocaleTimeString()}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400 block">Size</span>
-                          <span className="text-gray-900 dark:text-white font-medium">
-                            {Math.round((capturedImage.length * 0.75) / 1024)} KB
-                          </span>
-                        </div>
+
+                  <div className="p-4 border-t border-white/10">
+                    <div className="grid grid-cols-2 gap-3 text-sm text-gray-300">
+                      <div>
+                        <div className="text-gray-400">Captured</div>
+                        <div className="text-white/90">{new Date().toLocaleTimeString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-400">Size</div>
+                        <div className="text-white/90">{Math.round((capturedImage.length * 0.75) / 1024)} KB</div>
                       </div>
                     </div>
-
                     {isProcessing ? (
-                      <div className="flex flex-col items-center py-4">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
-                        <p className="text-gray-600 dark:text-gray-300">Generating cryptographic proof...</p>
+                      <div className="flex items-center justify-center gap-3 py-4 text-gray-200">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white"></div>
+                        Generating cryptographic proof…
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <button
                           onClick={downloadImage}
-                          className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                          className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 text-white px-4 py-3 border border-white/10"
                         >
                           <ArrowDownTrayIcon className="h-5 w-5" />
                           Download
                         </button>
                         <button
                           onClick={processCapturedImage}
-                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-center"
+                          className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white px-4 py-3 font-medium shadow-lg shadow-emerald-900/40"
                         >
                           Generate Proof
                         </button>
                         <button
                           onClick={retakePhoto}
-                          className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-center"
+                          className="inline-flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/15 text-white px-4 py-3 border border-white/10"
                         >
                           Retake
                         </button>
@@ -611,34 +517,34 @@ export default function UploadPage() {
               <canvas ref={canvasRef} className="hidden" />
 
               {error && (
-                <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                  <p className="text-red-600 dark:text-red-400 text-sm sm:text-base">{error}</p>
+                <div className="mt-2 p-4 rounded-xl border border-red-500/20 bg-red-500/10 text-red-200 text-sm">
+                  {error}
                 </div>
               )}
             </>
           ) : (
             /* Proof Results */
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8">
               <div className="flex items-center mb-6">
-                <CheckCircleIcon className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 dark:text-green-400 mr-3" />
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                <CheckCircleIcon className="h-6 w-6 sm:h-7 sm:w-7 text-emerald-400 mr-3" />
+                <h2 className="text-xl sm:text-2xl font-medium text-white">
                   Authentic Photo Verified
                 </h2>
               </div>
 
-              <div className="space-y-4 sm:space-y-6">
+              <div className="space-y-5">
                 {/* Image Hash */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
                     Image Hash (SHA-256)
                   </label>
                   <div className="flex items-center space-x-2">
-                    <code className="flex-1 bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-xs sm:text-sm font-mono break-all">
+                    <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">
                       {proof.imageHash}
                     </code>
                     <button
                       onClick={() => copyToClipboard(proof.imageHash)}
-                      className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                      className="flex-shrink-0 p-2 text-gray-300 hover:text-white"
                       title="Copy hash"
                     >
                       <DocumentDuplicateIcon className="h-5 w-5" />
@@ -648,16 +554,16 @@ export default function UploadPage() {
 
                 {/* Proof ID */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
                     Proof ID
                   </label>
                   <div className="flex items-center space-x-2">
-                    <code className="flex-1 bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-xs sm:text-sm font-mono break-all">
+                    <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">
                       {proof.id}
                     </code>
                     <button
                       onClick={() => copyToClipboard(proof.id)}
-                      className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                      className="flex-shrink-0 p-2 text-gray-300 hover:text-white"
                       title="Copy ID"
                     >
                       <DocumentDuplicateIcon className="h-5 w-5" />
@@ -668,32 +574,32 @@ export default function UploadPage() {
                 {/* File Details */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
                       File Name
                     </label>
-                    <p className="text-gray-900 dark:text-white text-sm sm:text-base">{proof.fileName}</p>
+                    <p className="text-gray-100 text-sm sm:text-base">{proof.fileName}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
                       File Size
                     </label>
-                    <p className="text-gray-900 dark:text-white text-sm sm:text-base">{formatFileSize(proof.fileSize)}</p>
+                    <p className="text-gray-100 text-sm sm:text-base">{formatFileSize(proof.fileSize)}</p>
                   </div>
                 </div>
 
                 {/* Metadata */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
                       Timestamp
                     </label>
-                    <p className="text-gray-900 dark:text-white text-sm sm:text-base">{formatDate(proof.createdAt)}</p>
+                    <p className="text-gray-100 text-sm sm:text-base">{formatDate(proof.createdAt)}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
                       Authenticity Status
                     </label>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
                       Camera Verified ✓
                     </span>
                   </div>
@@ -701,16 +607,16 @@ export default function UploadPage() {
 
                 {/* Verification URL */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
                     Verification Link
                   </label>
                   <div className="flex items-center space-x-2">
-                    <code className="flex-1 bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-xs sm:text-sm font-mono break-all">
+                    <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">
                       {typeof window !== 'undefined' ? `${window.location.origin}/verify/${proof.imageHash}` : ''}
                     </code>
                     <button
                       onClick={() => copyToClipboard(`${typeof window !== 'undefined' ? window.location.origin : ''}/verify/${proof.imageHash}`)}
-                      className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                      className="flex-shrink-0 p-2 text-gray-300 hover:text-white"
                       title="Copy verification link"
                     >
                       <DocumentDuplicateIcon className="h-5 w-5" />
@@ -719,16 +625,16 @@ export default function UploadPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
+                <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-2">
                   <button
                     onClick={() => setProof(null)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center"
+                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 transition-colors text-center"
                   >
                     Take Another Photo
                   </button>
                   <Link
                     href="/verify"
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white transition-colors text-center"
                   >
                     Verify an Image
                   </Link>
