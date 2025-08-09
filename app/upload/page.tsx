@@ -12,6 +12,7 @@ export default function UploadPage() {
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [currentFacingMode, setCurrentFacingMode] = useState<'user' | 'environment'>('user');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -37,37 +38,64 @@ export default function UploadPage() {
     }
   }, [capturedImage]);
 
+  // Moved switchCamera after stopCamera definition
+
   const startCamera = useCallback(async () => {
     setCameraError(null);
     
     try {
-      console.log('Starting camera...');
       
-      const constraints = { 
-        video: true,
-        audio: false 
-      };
+      // Simplified constraint strategies
+      const constraintStrategies = [
+        // Strategy 1: Try with facing mode if not desktop default
+        ...(currentFacingMode !== 'user' ? [{ 
+          video: {
+            width: { ideal: 1280, min: 640 },
+            height: { ideal: 720, min: 480 },
+            facingMode: currentFacingMode
+          },
+          audio: false 
+        }] : []),
+        // Strategy 2: Specific resolution (works best for desktop)
+        { 
+          video: {
+            width: { ideal: 1280, min: 640 },
+            height: { ideal: 720, min: 480 }
+          },
+          audio: false 
+        },
+        // Strategy 3: Basic fallback
+        {
+          video: true,
+          audio: false
+        }
+      ];
 
-      console.log('Requesting camera access...');
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log('Got stream with', stream.getVideoTracks().length, 'video tracks');
+      let stream: MediaStream | null = null;
       
+      for (const constraints of constraintStrategies) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          break;
+        } catch (err) {
+          continue; // Try next strategy
+        }
+      }
+      
+      if (!stream) {
+        throw new Error('All constraint strategies failed');
+      }
       streamRef.current = stream;
       
       if (videoRef.current) {
-        console.log('Setting video source...');
-        videoRef.current.srcObject = stream;
-        videoRef.current.setAttribute('playsinline', 'true');
-        videoRef.current.muted = true;
-        videoRef.current.autoplay = true;
+        const video = videoRef.current;
+        video.srcObject = stream;
+        video.setAttribute('playsinline', 'true');
+        video.muted = true;
+        video.autoplay = true;
         
-        // Simple play attempt
-        try {
-          await videoRef.current.play();
-          console.log('Video playing');
-        } catch (playError) {
-          console.warn('Play failed, but continuing:', playError);
-        }
+        // Start playing
+        video.play().catch(() => {}); // Ignore play errors
       }
       
       // Set camera as active
@@ -75,7 +103,8 @@ export default function UploadPage() {
       setError(null);
       setCameraError(null);
       
-      console.log('Camera setup complete');
+      // Auto-refresh video to ensure it displays properly
+      setTimeout(refreshVideo, 800);
     } catch (err: any) {
       console.error('Camera error:', err);
       
@@ -94,18 +123,11 @@ export default function UploadPage() {
       setCameraError(errorMessage);
       setIsCameraActive(false);
     }
-  }, []);
+  }, []); // Removed currentFacingMode dependency that was causing restart issues
 
-  // Auto-start camera when component mounts
-  useEffect(() => {
-    console.log('Auto-start camera effect triggered');
-    const timer = setTimeout(() => {
-      console.log('Auto-starting camera...');
-      startCamera();
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
+  // Removed complex restart logic that was causing issues
+
+  // Note: Auto-start removed to prevent unexpected camera behavior
 
   const stopCamera = useCallback((options?: { clearPhoto?: boolean }) => {
     console.log('Stopping camera...');
@@ -125,6 +147,18 @@ export default function UploadPage() {
     }
     setCameraError(null);
   }, []);
+
+  const switchCamera = useCallback(async () => {
+    const newFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+    setCurrentFacingMode(newFacingMode);
+    if (isCameraActive) {
+      stopCamera();
+      // Wait a bit then restart with new facing mode
+      setTimeout(async () => {
+        await startCamera();
+      }, 500);
+    }
+  }, [currentFacingMode, isCameraActive, stopCamera, startCamera]);
 
   const capturePhoto = useCallback(async () => {
     try {
@@ -305,8 +339,19 @@ export default function UploadPage() {
     startCamera();
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // You could add a toast notification here if desired
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -321,20 +366,22 @@ export default function UploadPage() {
     return new Date(dateString).toLocaleString();
   };
 
-  const refreshVideo = () => {
+  const refreshVideo = useCallback(() => {
     if (videoRef.current && streamRef.current) {
       const video = videoRef.current;
       console.log('Refreshing video display...');
       
-      // Force video refresh
+      // Simple refresh approach
       video.style.display = 'none';
       video.offsetHeight; // Trigger reflow
       video.style.display = 'block';
       
-      // Try to restart playback
-      video.play().catch(console.warn);
+      // Restart playback
+      video.play().catch(err => {
+        console.warn('Video refresh failed:', err);
+      });
     }
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
@@ -408,7 +455,14 @@ export default function UploadPage() {
                     <div className="absolute top-4 left-4 text-[11px] px-2 py-1 rounded-full bg-black/60 text-white/90 border border-white/10">
                       Camera Active
                     </div>
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-4 right-4 flex gap-2">
+                      <button
+                        onClick={switchCamera}
+                        className="text-xs px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white/90 border border-white/10"
+                        title="Switch camera"
+                      >
+                        🔄
+                      </button>
                       <button
                         onClick={refreshVideo}
                         className="text-xs px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white/90 border border-white/10"
