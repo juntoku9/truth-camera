@@ -381,8 +381,8 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-hero-dark">
-      <div className="container mx-auto px-4 py-8 sm:py-12">
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
+      <div className="container mx-auto px-4 py-6 sm:py-10">
         {/* Hero Header */}
         <div className="flex items-center justify-between mb-6 sm:mb-10">
           <Link
@@ -410,18 +410,18 @@ export default function UploadPage() {
             <>
               {/* Idle State */}
               {!isCameraActive && !capturedImage && (
-                <div className="relative card-dark p-8">
+                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-8">
                   <div className="text-center">
-                    <CameraIcon className="h-16 w-16 sm:h-20 sm:w-20 text-cyan-300 mx-auto mb-5" />
-                    <h3 className="text-xl sm:text-2xl font-semibold text-slate-100 mb-2">
+                    <CameraIcon className="h-16 w-16 sm:h-20 sm:w-20 text-blue-400/90 mx-auto mb-5" />
+                    <h3 className="text-xl sm:text-2xl font-medium text-white mb-2">
                       Direct Capture Only
                     </h3>
-                    <p className="text-slate-300/90 mb-6 text-sm sm:text-base">
+                    <p className="text-gray-300/90 mb-6 text-sm sm:text-base">
                       Capture an authentic frame straight from your device sensor. No files, no drag-and-drop.
                     </p>
                     <button
                       onClick={startCamera}
-                      className="mx-auto inline-flex items-center gap-2 rounded-full cta-dark px-6 sm:px-8 py-3 text-white font-medium"
+                      className="mx-auto inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 sm:px-8 py-3 text-white font-medium shadow-lg shadow-blue-900/40 hover:from-blue-500 hover:to-indigo-500 transition-colors"
                     >
                       <CameraIcon className="h-5 w-5" />
                       Start Camera
@@ -435,9 +435,9 @@ export default function UploadPage() {
 
               {/* Camera View */}
               {isCameraActive && (
-                <div className="relative card-dark">
+                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
                   <div className="relative">
-                    <div className="aspect-[16/10] w-full panel-dark rounded-t-2xl">
+                    <div className="aspect-[16/10] w-full bg-black/70">
                       <video
                         ref={videoRef}
                         className="h-full w-full object-cover rounded-t-2xl"
@@ -464,17 +464,17 @@ export default function UploadPage() {
                   </div>
 
                   {/* Sticky Action Bar */}
-                  <div className="flex items-center justify-center gap-3 p-4 border-t border-white/10 bg-white/5">
+                  <div className="flex items-center justify-center gap-3 p-4 border-t border-white/10 bg-gradient-to-b from-white/5 to-transparent">
                     <button
                       onClick={capturePhoto}
-                      className="inline-flex items-center gap-2 rounded-full cta-dark px-5 py-2.5 text-white font-medium text-base"
+                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-5 py-2.5 text-white font-medium shadow-lg shadow-indigo-900/40 hover:from-indigo-400 hover:to-violet-500 transition-colors text-base"
                     >
                       <PhotoIcon className="h-5 w-5" />
                       Capture
                     </button>
                     <button
                       onClick={() => stopCamera({ clearPhoto: true })}
-                      className="inline-flex items-center gap-2 rounded-full pill px-5 py-2.5"
+                      className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 text-white px-5 py-2.5 border border-white/10"
                     >
                       <XMarkIcon className="h-5 w-5" />
                       Cancel
@@ -485,7 +485,7 @@ export default function UploadPage() {
 
               {/* Captured Image Preview */}
               {capturedImage && (
-                <div ref={previewRef} className="relative card-dark">
+                <div ref={previewRef} className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
                   <div className="relative">
                     <img
                       src={capturedImage}
@@ -515,7 +515,7 @@ export default function UploadPage() {
                   </div>
 
                   <div className="p-4 border-t border-white/10">
-                      <div className="grid grid-cols-2 gap-3 text-sm text-slate-300">
+                    <div className="grid grid-cols-2 gap-3 text-sm text-gray-300">
                       <div>
                         <div className="text-gray-400">Captured</div>
                         <div className="text-white/90">{new Date().toLocaleTimeString()}</div>
@@ -534,20 +534,20 @@ export default function UploadPage() {
                       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <button
                           onClick={downloadImage}
-                            className="inline-flex items-center justify-center gap-2 rounded-full pill px-4 py-3"
+                          className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 text-white px-4 py-3 border border-white/10"
                         >
                           <ArrowDownTrayIcon className="h-5 w-5" />
                           Download
                         </button>
                         <button
                           onClick={processCapturedImage}
-                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-3 font-medium shadow-md"
+                          className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white px-4 py-3 font-medium shadow-lg shadow-emerald-900/40"
                         >
                           Generate Proof
                         </button>
                         <button
                           onClick={retakePhoto}
-                            className="inline-flex items-center justify-center rounded-full pill px-4 py-3"
+                          className="inline-flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/15 text-white px-4 py-3 border border-white/10"
                         >
                           Retake
                         </button>
@@ -677,7 +677,7 @@ export default function UploadPage() {
                     Take Another Photo
                   </button>
                   <Link
-                    href="/start?tab=verify"
+                    href="/verify"
                     className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white transition-colors text-center"
                   >
                     Verify an Image

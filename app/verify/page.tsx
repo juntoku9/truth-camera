@@ -86,8 +86,8 @@ export default function VerifyPage() {
   const formatDate = (dateString: string) => new Date(dateString).toLocaleString();
 
   return (
-    <div className="min-h-screen bg-hero-dark">
-      <div className="container mx-auto px-4 py-8 sm:py-12">
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
+      <div className="container mx-auto px-4 py-6 sm:py-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 sm:mb-10">
           <Link
@@ -108,10 +108,10 @@ export default function VerifyPage() {
             <>
               {/* Upload Area */}
               <div
-                className={`card-dark p-10 text-center transition-all duration-300 ${
+                className={`rounded-2xl p-10 text-center border transition-all duration-300 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] ${
                   isDragging
-                    ? 'ring-2 ring-emerald-400/40'
-                    : ''
+                    ? 'border-emerald-500/30 bg-emerald-500/10'
+                    : 'border-white/10 bg-white/5 hover:bg-white/7'
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -120,19 +120,19 @@ export default function VerifyPage() {
                 {isProcessing ? (
                   <div className="flex flex-col items-center">
                     <div className="h-10 w-10 sm:h-12 sm:w-12 animate-spin rounded-full border-2 border-white/20 border-t-white mb-4"></div>
-                    <p className="text-base sm:text-lg text-slate-200">Verifying image…</p>
-                    <p className="text-sm text-slate-400 mt-2">Checking against local proofs</p>
+                    <p className="text-base sm:text-lg text-gray-200">Verifying image…</p>
+                    <p className="text-sm text-gray-400 mt-2">Checking against local proofs</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center">
-                    <DocumentMagnifyingGlassIcon className="h-12 w-12 sm:h-14 sm:w-14 text-cyan-300 mb-4" />
-                    <h3 className="text-lg sm:text-xl font-medium text-slate-100 mb-2">Drop your image here to verify</h3>
-                    <p className="text-slate-300 mb-6 text-sm sm:text-base">Or click to browse files</p>
-                    <label className="cursor-pointer inline-flex items-center justify-center rounded-full cta-dark text-white px-6 py-3 font-medium w-full sm:w-auto">
+                    <DocumentMagnifyingGlassIcon className="h-12 w-12 sm:h-14 sm:w-14 text-gray-300 mb-4" />
+                    <h3 className="text-lg sm:text-xl font-medium text-white mb-2">Drop your image here to verify</h3>
+                    <p className="text-gray-300 mb-6 text-sm sm:text-base">Or click to browse files</p>
+                    <label className="cursor-pointer inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white px-6 py-3 font-medium shadow-lg shadow-emerald-900/40 w-full sm:w-auto">
                       Choose File
                       <input type="file" className="hidden" accept="image/*" onChange={handleFileInput} />
                     </label>
-                    <p className="text-xs sm:text-sm text-slate-400 mt-4">Supports: JPG, PNG, GIF, WEBP (Max: 10MB)</p>
+                    <p className="text-xs sm:text-sm text-gray-400 mt-4">Supports: JPG, PNG, GIF, WEBP (Max: 10MB)</p>
                   </div>
                 )}
               </div>
@@ -145,7 +145,7 @@ export default function VerifyPage() {
             </>
           ) : (
             /* Verification Results */
-            <div className="relative card-dark p-6 sm:p-8">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8">
               <div className="flex items-center mb-6">
                 {result.isAuthentic ? (
                   <>
@@ -212,13 +212,13 @@ export default function VerifyPage() {
                 <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-2">
                   <button
                     onClick={() => setResult(null)}
-                    className="px-4 py-2 rounded-full pill text-white/90 transition-colors text-center"
+                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 transition-colors text-center"
                   >
                     Verify Another Image
                   </button>
                   <Link
-                    href="/start?tab=capture"
-                    className="px-4 py-2 rounded-full cta-dark text-white transition-colors text-center"
+                    href="/upload"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white transition-colors text-center"
                   >
                     Take Photo
                   </Link>

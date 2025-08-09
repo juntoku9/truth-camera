@@ -44,7 +44,7 @@ export default function VerifyHashPage() {
   }
 
   return (
-    <div className="min-h-screen bg-hero-dark">
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
       <div className="container mx-auto px-4 py-6 sm:py-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 sm:mb-10">
@@ -62,7 +62,7 @@ export default function VerifyHashPage() {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <div className="relative card-dark p-6 sm:p-8">
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8">
             {proof ? (
               <>
                 {/* Status Header */}
@@ -189,10 +189,10 @@ export default function VerifyHashPage() {
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/10">
-              <Link href="/verify" className="px-4 py-2 rounded-full pill text-white/90 text-center">
+              <Link href="/verify" className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 text-center">
                 Verify Another Image
               </Link>
-              <Link href="/start?tab=capture" className="px-4 py-2 rounded-full cta-dark text-white text-center">
+              <Link href="/upload" className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-center">
                 Take Photo
               </Link>
             </div>
