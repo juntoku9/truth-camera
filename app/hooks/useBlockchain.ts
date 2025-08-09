@@ -98,11 +98,12 @@ export function useBlockchain() {
   }, [walletClient, isConnected, address, ensureBase]);
 
   // Force-switch to Base as soon as the wallet connects or chain changes
-  useEffect(() => {
-    if (isConnected) {
-      ensureBase();
-    }
-  }, [isConnected, currentChainId, ensureBase]);
+  // (disabled to avoid auto prompts; we enforce on submit instead)
+  // useEffect(() => {
+  //   if (isConnected) {
+  //     ensureBase();
+  //   }
+  // }, [isConnected, currentChainId, ensureBase]);
 
   const submitProof = useCallback(async (imageHash: string): Promise<string> => {
     if (!contract) throw new Error('Contract not initialized.');
