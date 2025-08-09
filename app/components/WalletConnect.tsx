@@ -4,7 +4,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { WalletIcon } from '@heroicons/react/24/outline';
 
 export function WalletConnect() {
-  const { ready, authenticated, login, logout } = usePrivy();
+  const { ready, authenticated, login, logout, user } = usePrivy();
 
   if (!ready) {
     return (
@@ -27,13 +27,24 @@ export function WalletConnect() {
     );
   }
 
+  const linked = (user as any)?.linkedAccounts || [];
+  const linkedWallet = linked.find((a: any) => a.type === 'wallet');
+  const addr = ((user as any)?.wallet as any)?.address || (linkedWallet as any)?.address || '';
+  const short = addr ? `${addr.slice(0,6)}...${addr.slice(-4)}` : 'Connected';
+
   return (
-    <button
-      onClick={() => logout()}
-      className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 px-3 py-2 text-sm text-white border border-white/10 transition-colors"
-    >
-      Sign out
-    </button>
+    <div className="flex items-center gap-2">
+      <div className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm text-white border border-white/10">
+        <div className="w-2 h-2 rounded-full bg-green-400"></div>
+        {short}
+      </div>
+      <button
+        onClick={() => logout()}
+        className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 px-3 py-2 text-sm text-white border border-white/10 transition-colors"
+      >
+        Sign out
+      </button>
+    </div>
   );
 }
 
