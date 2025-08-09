@@ -8,7 +8,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     <PrivyProvider
       appId={appId}
       config={{
-        loginMethods: ['email', 'wallet'],
+        loginMethods: ['email', 'wallet', 'farcaster'],
         appearance: { theme: 'dark' },
         embeddedWallets: {
           ethereum: { createOnLogin: 'users-without-wallets' },
