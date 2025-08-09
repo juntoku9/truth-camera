@@ -2,12 +2,22 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeftIcon, CameraIcon, CheckCircleIcon, DocumentDuplicateIcon, PhotoIcon, XMarkIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
-import { createProofRecord, saveProof, type ProofRecord } from '../utils/crypto';
+import { ArrowLeftIcon, CameraIcon, CheckCircleIcon, DocumentDuplicateIcon, PhotoIcon, XMarkIcon, ArrowDownTrayIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { hashImageFile } from '../utils/crypto';
+import { useBlockchain } from '../hooks/useBlockchain';
+import { WalletConnect, WalletStatus } from '../components/WalletConnect';
+import { formatAddress, formatTimestamp } from '../utils/blockchain';
+
+interface BlockchainProofResult {
+  hash: string;
+  transactionHash: string;
+  submitter: string;
+  timestamp: number;
+}
 
 export default function UploadPage() {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [proof, setProof] = useState<ProofRecord | null>(null);
+  const [proof, setProof] = useState<BlockchainProofResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -17,6 +27,19 @@ export default function UploadPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  // Blockchain hook
+  const {
+    isConnected,
+    address,
+    isLoading: isBlockchainLoading,
+    error: blockchainError,
+    submitProof,
+    isContractReady,
+    canSubmitProofs,
+    getContractAddress,
+    clearError
+  } = useBlockchain();
 
   // Clean up camera stream when component unmounts
   useEffect(() => {
@@ -326,19 +349,50 @@ export default function UploadPage() {
   const processCapturedImage = async () => {
     if (!capturedImage) return;
 
+    if (!isConnected) {
+      setError('Please connect your wallet to submit proof to blockchain.');
+      return;
+    }
+
+    if (!isContractReady()) {
+      setError('Smart contract not configured. Please check the contract address in environment variables.');
+      return;
+    }
+
+    if (!canSubmitProofs()) {
+      setError('Wallet not properly connected for blockchain transactions. Please reconnect your wallet.');
+      return;
+    }
+
     setError(null);
     setIsProcessing(true);
+    clearError();
 
     try {
       const filename = `truth-camera-${Date.now()}.jpg`;
       const file = convertDataUrlToFile(capturedImage, filename);
-      const proofRecord = await createProofRecord(file);
-      saveProof(proofRecord);
-      setProof(proofRecord);
+      const imageHash = await hashImageFile(file);
+      
+      // Submit to blockchain
+      const transactionHash = await submitProof(imageHash);
+      
+      setProof({
+        hash: imageHash,
+        transactionHash,
+        submitter: address || '',
+        timestamp: Math.floor(Date.now() / 1000)
+      });
       setCapturedImage(null);
-    } catch (err) {
-      setError('Failed to process captured image. Please try again.');
-      console.error('Error creating proof:', err);
+    } catch (err: any) {
+      if (err.message.includes('already submitted')) {
+        setError('This image hash has already been submitted to the blockchain.');
+      } else if (err.message.includes('user rejected')) {
+        setError('Transaction was cancelled by user.');
+      } else if (err.message.includes('insufficient funds')) {
+        setError('Insufficient funds for transaction. Please add ETH to your wallet.');
+      } else {
+        setError(`Failed to submit proof to blockchain: ${err.message}`);
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -393,19 +447,39 @@ export default function UploadPage() {
             <span className="hidden sm:inline">Back to Home</span>
             <span className="sm:hidden">Back</span>
           </Link>
-          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-            Research Prototype
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+              Research Prototype
+            </span>
+            <WalletConnect />
+          </div>
         </div>
 
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">Truth Camera</h1>
           <p className="mt-3 text-sm sm:text-base text-gray-300">
-            Minimal capture tool for cryptographic image provenance. Camera-only. No uploads.
+            Minimal capture tool for blockchain-secured image provenance. Camera-only. No uploads.
           </p>
+          <div className="mt-4">
+            <WalletStatus />
+          </div>
+          {!isConnected && (
+            <div className="mt-4 p-3 bg-yellow-900/20 border border-yellow-800 rounded-lg max-w-md mx-auto">
+              <div className="flex items-center gap-2 text-yellow-300 text-sm">
+                <ExclamationTriangleIcon className="h-4 w-4" />
+                Connect wallet to submit proofs to blockchain
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="max-w-3xl mx-auto space-y-6">
+          {/* Contract Info */}
+          {isContractReady() && (
+            <div className="text-center text-xs text-gray-400">
+              Contract: {formatAddress(getContractAddress())}
+            </div>
+          )}
           {!proof ? (
             <>
               {/* Idle State */}
@@ -541,9 +615,23 @@ export default function UploadPage() {
                         </button>
                         <button
                           onClick={processCapturedImage}
-                          className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white px-4 py-3 font-medium shadow-lg shadow-emerald-900/40"
+                          disabled={isProcessing || isBlockchainLoading || !canSubmitProofs()}
+                          className={`inline-flex items-center justify-center rounded-xl px-4 py-3 font-medium shadow-lg transition-colors ${
+                            canSubmitProofs() && !isProcessing && !isBlockchainLoading
+                              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-emerald-900/40'
+                              : 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                          }`}
                         >
-                          Generate Proof
+                          {isProcessing || isBlockchainLoading ? (
+                            <>
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white mr-2"></div>
+                              Submitting...
+                            </>
+                          ) : canSubmitProofs() ? (
+                            'Generate Proof'
+                          ) : (
+                            'Connect Wallet'
+                          )}
                         </button>
                         <button
                           onClick={retakePhoto}
@@ -584,10 +672,10 @@ export default function UploadPage() {
                   </label>
                   <div className="flex items-center space-x-2">
                     <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">
-                      {proof.imageHash}
+                      {proof.hash}
                     </code>
                     <button
-                      onClick={() => copyToClipboard(proof.imageHash)}
+                      onClick={() => copyToClipboard(proof.hash)}
                       className="flex-shrink-0 p-2 text-gray-300 hover:text-white"
                       title="Copy hash"
                     >
@@ -596,57 +684,49 @@ export default function UploadPage() {
                   </div>
                 </div>
 
-                {/* Proof ID */}
+                {/* Transaction Hash */}
                 <div>
                   <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
-                    Proof ID
+                    Transaction Hash
                   </label>
                   <div className="flex items-center space-x-2">
                     <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">
-                      {proof.id}
+                      {proof.transactionHash}
                     </code>
                     <button
-                      onClick={() => copyToClipboard(proof.id)}
+                      onClick={() => copyToClipboard(proof.transactionHash)}
                       className="flex-shrink-0 p-2 text-gray-300 hover:text-white"
-                      title="Copy ID"
+                      title="Copy transaction hash"
                     >
                       <DocumentDuplicateIcon className="h-5 w-5" />
                     </button>
                   </div>
                 </div>
 
-                {/* File Details */}
+                {/* Blockchain Details */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
-                      File Name
+                      Submitter
                     </label>
-                    <p className="text-gray-100 text-sm sm:text-base">{proof.fileName}</p>
+                    <p className="text-gray-100 text-sm sm:text-base font-mono">{formatAddress(proof.submitter)}</p>
                   </div>
-                  <div>
-                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
-                      File Size
-                    </label>
-                    <p className="text-gray-100 text-sm sm:text-base">{formatFileSize(proof.fileSize)}</p>
-                  </div>
-                </div>
-
-                {/* Metadata */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
                       Timestamp
                     </label>
-                    <p className="text-gray-100 text-sm sm:text-base">{formatDate(proof.createdAt)}</p>
+                    <p className="text-gray-100 text-sm sm:text-base">{formatTimestamp(proof.timestamp)}</p>
                   </div>
-                  <div>
-                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
-                      Authenticity Status
-                    </label>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
-                      Camera Verified ✓
-                    </span>
-                  </div>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
+                    Authenticity Status
+                  </label>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
+                    Blockchain Verified ✓
+                  </span>
                 </div>
 
                 {/* Verification URL */}
@@ -656,10 +736,10 @@ export default function UploadPage() {
                   </label>
                   <div className="flex items-center space-x-2">
                     <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">
-                      {typeof window !== 'undefined' ? `${window.location.origin}/verify/${proof.imageHash}` : ''}
+                      {typeof window !== 'undefined' ? `${window.location.origin}/verify/${proof.hash}` : ''}
                     </code>
                     <button
-                      onClick={() => copyToClipboard(`${typeof window !== 'undefined' ? window.location.origin : ''}/verify/${proof.imageHash}`)}
+                      onClick={() => copyToClipboard(`${typeof window !== 'undefined' ? window.location.origin : ''}/verify/${proof.hash}`)}
                       className="flex-shrink-0 p-2 text-gray-300 hover:text-white"
                       title="Copy verification link"
                     >

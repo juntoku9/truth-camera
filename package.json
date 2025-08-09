@@ -11,9 +11,14 @@
   "dependencies": {
     "@coinbase/onchainkit": "^0.38.19",
     "@heroicons/react": "^2.2.0",
+    "@rainbow-me/rainbowkit": "^2.2.8",
+    "@tanstack/react-query": "^5.84.2",
+    "ethers": "^6.15.0",
     "next": "15.4.6",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "viem": "^2.33.3",
+    "wagmi": "^2.16.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

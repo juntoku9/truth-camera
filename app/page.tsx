@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from "next/link";
 import { CameraIcon, ShieldCheckIcon, DocumentMagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
+import { WalletConnect } from './components/WalletConnect';
 
 export default function Home() {
   const { setFrameReady, isFrameReady } = useMiniKit();
@@ -20,8 +21,8 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8 sm:py-14">
         {/* Hero */}
         <div className="flex items-center justify-between mb-6 sm:mb-10">
-          <div/>
           <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Research Prototype</span>
+          <WalletConnect />
         </div>
 
         <div className="text-center mb-10 sm:mb-14">
@@ -45,7 +46,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl sm:text-2xl font-medium text-white mb-2 text-center">Take Photo</h3>
               <p className="text-gray-300 text-center mb-5 text-sm sm:text-base">
-                Use your device camera to capture an authentic frame secured with a cryptographic fingerprint.
+                Use your device camera to capture an authentic frame secured with blockchain proof.
               </p>
               <div className="text-center">
                 <span className="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium shadow-lg shadow-blue-900/40 group-hover:from-blue-500 group-hover:to-indigo-500 transition-colors text-sm sm:text-base">
@@ -64,7 +65,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl sm:text-2xl font-medium text-white mb-2 text-center">Verify Image</h3>
               <p className="text-gray-300 text-center mb-5 text-sm sm:text-base">
-                Check an image against locally stored proofs to confirm authenticity.
+                Check an image against blockchain proofs to confirm authenticity.
               </p>
               <div className="text-center">
                 <span className="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium shadow-lg shadow-emerald-900/40 group-hover:from-emerald-400 group-hover:to-teal-500 transition-colors text-sm sm:text-base">
@@ -97,8 +98,8 @@ export default function Home() {
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 bg-violet-500/10 border border-violet-500/20">
                 <span className="text-violet-300 font-semibold text-base sm:text-lg">3</span>
               </div>
-              <h4 className="font-medium text-white mb-2 text-sm sm:text-base">Store Proof</h4>
-              <p className="text-gray-300 text-xs sm:text-sm">Proofs are stored locally for later verification.</p>
+              <h4 className="font-medium text-white mb-2 text-sm sm:text-base">Store on Blockchain</h4>
+              <p className="text-gray-300 text-xs sm:text-sm">Proofs are immutably stored on-chain for verification.</p>
             </div>
           </div>
         </div>
@@ -109,8 +110,8 @@ export default function Home() {
             <div className="flex items-start space-x-3">
               <ShieldCheckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-300 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-base sm:text-lg font-medium text-blue-200 mb-1">Camera-first Security</h4>
-                <p className="text-blue-200/90 text-sm sm:text-base">Requiring direct capture reduces the attack surface and prevents pre-edited submissions.</p>
+                <h4 className="text-base sm:text-lg font-medium text-blue-200 mb-1">Blockchain-Secured Authenticity</h4>
+                <p className="text-blue-200/90 text-sm sm:text-base">Camera-first capture with immutable blockchain proofs ensures maximum authenticity and prevents tampering.</p>
               </div>
             </div>
           </div>
