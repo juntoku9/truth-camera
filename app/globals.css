@@ -3,6 +3,15 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Truth Camera brand tokens */
+  --tc-ink-950: #050607;
+  --tc-ink-900: #0a0c10;
+  --tc-edge-700: #1c2230;
+  --tc-electric-blue: #17a8ff;
+  --tc-electric-cyan: #2df2ff;
+  --tc-neon-orange: #ff4d00;
+  --tc-neon-orange-2: #ff6a00;
 }
 
 @theme inline {
@@ -23,4 +32,70 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ===== Brand utilities (used alongside Tailwind) ===== */
+
+/* Buttons */
+.tc-btn-orange {
+  background-image: linear-gradient(90deg, var(--tc-neon-orange), var(--tc-neon-orange-2));
+  color: white;
+  border: 1px solid color-mix(in srgb, var(--tc-neon-orange) 40%, transparent);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--tc-neon-orange) 28%, transparent);
+}
+.tc-btn-orange:hover { filter: brightness(1.05); box-shadow: 0 16px 40px color-mix(in srgb, var(--tc-neon-orange) 36%, transparent); }
+
+.tc-btn-blue {
+  background-image: linear-gradient(90deg, var(--tc-electric-blue), var(--tc-electric-cyan));
+  color: white;
+  border: 1px solid color-mix(in srgb, var(--tc-electric-blue) 40%, transparent);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--tc-electric-blue) 28%, transparent);
+}
+.tc-btn-blue:hover { filter: brightness(1.05); box-shadow: 0 16px 40px color-mix(in srgb, var(--tc-electric-blue) 36%, transparent); }
+
+/* Glows */
+.tc-glow-blue { box-shadow: 0 0 0 1px color-mix(in srgb, var(--tc-electric-blue) 35%, transparent), 0 20px 60px rgba(23,168,255,0.25); }
+.tc-glow-orange { box-shadow: 0 0 0 1px color-mix(in srgb, var(--tc-neon-orange) 35%, transparent), 0 20px 60px rgba(255,77,0,0.25); }
+
+/* Lens ring pulse */
+@keyframes tc-ring-pulse { 0% { opacity: .10; transform: scale(.98); } 50% { opacity: .25; transform: scale(1); } 100% { opacity: .10; transform: scale(.98); } }
+.tc-lens-ring { position: relative; }
+.tc-lens-ring::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--tc-electric-blue) 50%, transparent);
+  box-shadow: 0 0 40px rgba(23,168,255,0.25);
+  animation: tc-ring-pulse 10s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* (lens orb previously here; removed per request) */
+
+/* Dropzone subtle breathing on drag */
+@keyframes tc-breathe-orange { 0% { box-shadow: 0 0 0 0 rgba(255,77,0,0.18);} 50% { box-shadow: 0 0 0 10px rgba(255,77,0,0.06);} 100% { box-shadow: 0 0 0 0 rgba(255,77,0,0.18);} }
+.tc-drag-animate { animation: tc-breathe-orange 2s ease-in-out infinite; }
+
+/* Hero background helper (uses env-provided image when present) */
+.tc-hero {
+  background-color: var(--tc-ink-950);
+  background-image: radial-gradient(800px 400px at 50% -10%, rgba(23,168,255,0.12), transparent),
+    radial-gradient(600px 300px at 80% 20%, rgba(255,77,0,0.08), transparent);
+}
+
+/* Wordmark style (text-based approximation of the marketing logo) */
+.tc-wordmark {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  background: linear-gradient(180deg, var(--tc-neon-orange), var(--tc-neon-orange-2) 70%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(0,0,0,0.35);
+  text-shadow:
+    0 2px 10px rgba(255, 77, 0, 0.30),
+    0 0 1px rgba(0,0,0,0.6);
+  transform: skewX(-5deg) rotate(-1deg);
 }

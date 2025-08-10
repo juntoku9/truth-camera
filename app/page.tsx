@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Image from 'next/image';
 import Link from "next/link";
 import { CameraIcon, ShieldCheckIcon, DocumentMagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
@@ -8,6 +9,8 @@ import { WalletConnect } from './components/WalletConnect';
 
 export default function Home() {
   const { setFrameReady, isFrameReady } = useMiniKit();
+  const heroImage = process.env.NEXT_PUBLIC_APP_HERO_IMAGE;
+  const wordmarkImage = process.env.NEXT_PUBLIC_APP_WORDMARK || process.env.NEXT_PUBLIC_APP_LOGO || '/truth-wordmark.png';
 
   // The setFrameReady() function is called when your mini-app is ready to be shown
   useEffect(() => {
@@ -17,19 +20,37 @@ export default function Home() {
   }, [setFrameReady, isFrameReady]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
-      <div className="container mx-auto px-4 py-8 sm:py-14">
+    <div className="min-h-screen tc-hero relative">
+      {heroImage ? (
+        <div
+          className="absolute inset-0 opacity-15 pointer-events-none"
+          style={{
+            backgroundImage: `url(${heroImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+      ) : null}
+      <div className="relative container mx-auto px-4 py-8 sm:py-14">
         {/* Hero */}
         <div className="flex items-center justify-between mb-6 sm:mb-10">
-          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Research Prototype</span>
+          <span className="px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 text-white/80 bg-white/5">Research Prototype</span>
           <WalletConnect />
         </div>
 
         <div className="text-center mb-10 sm:mb-14">
-          <div className="flex justify-center mb-4 sm:mb-5">
-            <CameraIcon className="h-12 w-12 sm:h-14 sm:w-14 text-blue-400/90" />
+          <div className="flex justify-center">
+            <Image
+              src={wordmarkImage}
+              alt="Truth Camera logo"
+              width={960}
+              height={280}
+              priority
+              sizes="(min-width: 1024px) 820px, 90vw"
+              className="w-[min(96%,820px)] sm:w-[min(92%,900px)] h-auto drop-shadow-[0_0_24px_rgba(255,77,0,0.28)]"
+            />
           </div>
-          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-white">Truth Camera</h1>
           <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto">
             Minimal camera-first tool for cryptographic image provenance. Capture or verify with a clean, tamper-resistant flow.
           </p>
@@ -38,10 +59,10 @@ export default function Home() {
         {/* Main Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto mb-10 sm:mb-14">
           <Link href="/upload" className="group">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8 h-full">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl tc-glow-orange p-6 sm:p-8 h-full">
               <div className="flex items-center justify-center mb-4 sm:mb-6">
-                <div className="p-3 sm:p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                  <CameraIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400" />
+                <div className="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10">
+                  <CameraIcon className="h-6 w-6 sm:h-8 sm:w-8 text-orange-400" />
                 </div>
               </div>
               <h3 className="text-xl sm:text-2xl font-medium text-white mb-2 text-center">Take Photo</h3>
@@ -49,18 +70,16 @@ export default function Home() {
                 Use your device camera to capture an authentic frame secured with blockchain proof.
               </p>
               <div className="text-center">
-                <span className="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium shadow-lg shadow-blue-900/40 group-hover:from-blue-500 group-hover:to-indigo-500 transition-colors text-sm sm:text-base">
-                  Start Camera →
-                </span>
+                <span className="inline-flex items-center px-5 py-2.5 rounded-xl tc-btn-orange text-sm sm:text-base">Start Camera →</span>
               </div>
             </div>
           </Link>
 
           <Link href="/verify" className="group">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8 h-full">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl tc-glow-blue p-6 sm:p-8 h-full">
               <div className="flex items-center justify-center mb-4 sm:mb-6">
-                <div className="p-3 sm:p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                  <DocumentMagnifyingGlassIcon className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-300" />
+                <div className="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10">
+                  <DocumentMagnifyingGlassIcon className="h-6 w-6 sm:h-8 sm:w-8 text-sky-300" />
                 </div>
               </div>
               <h3 className="text-xl sm:text-2xl font-medium text-white mb-2 text-center">Verify Image</h3>
@@ -68,16 +87,14 @@ export default function Home() {
                 Check an image against blockchain proofs to confirm authenticity.
               </p>
               <div className="text-center">
-                <span className="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium shadow-lg shadow-emerald-900/40 group-hover:from-emerald-400 group-hover:to-teal-500 transition-colors text-sm sm:text-base">
-                  Verify Image →
-                </span>
+                <span className="inline-flex items-center px-5 py-2.5 rounded-xl tc-btn-blue text-sm sm:text-base">Verify Image →</span>
               </div>
             </div>
           </Link>
         </div>
 
         {/* How it Works */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8 max-w-4xl mx-auto">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8 max-w-4xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-medium text-white mb-6 sm:mb-8 text-center">How It Works</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
             <div className="text-center">
