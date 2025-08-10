@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { BookOpenIcon, ArrowUpRightIcon } from '@heroicons/react/24/outline';
+import { BookOpenIcon } from '@heroicons/react/24/outline';
 
 export const metadata: Metadata = {
   title: 'Docs',
@@ -12,7 +11,7 @@ export default function DocsPage() {
     <div className="min-h-screen tc-hero relative">
       <div className="relative container mx-auto px-4 py-8 sm:py-14">
         {/* Hero */}
-        <div className="max-w-4xl mx-auto rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl p-6 sm:p-8 tc-glow-blue text-center">
+        <div className="max-w-4xl mx-auto rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl p-6 sm:p-8 tc-glow-orange text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80">
             <BookOpenIcon className="h-4 w-4" /> Docs
           </div>
@@ -22,9 +21,9 @@ export default function DocsPage() {
           </p>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_260px] gap-6 sm:gap-8 max-w-6xl mx-auto">
+        <div className="mt-8 max-w-6xl mx-auto">
           {/* Content */}
-          <main className="space-y-6 sm:space-y-8">
+          <main className="space-y-6 sm:space-y-8 max-w-4xl mx-auto">
             {/* Abstract */}
             <section id="abstract" className="rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl p-6 sm:p-8 tc-glow-blue">
               <div className="h-1 w-24 bg-gradient-to-r from-[var(--tc-electric-blue)] to-[var(--tc-electric-cyan)] rounded-full mb-4" />
@@ -322,8 +321,8 @@ export default function DocsPage() {
 
             
 
-            <section id="conclusion" className="rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl p-6 sm:p-8 tc-glow-blue">
-              <div className="h-1 w-24 bg-gradient-to-r from-[var(--tc-electric-blue)] to-[var(--tc-electric-cyan)] rounded-full mb-4" />
+            <section id="conclusion" className="rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl p-6 sm:p-8 tc-glow-orange">
+              <div className="h-1 w-24 bg-gradient-to-r from-[var(--tc-neon-orange)] to-[var(--tc-neon-orange-2)] rounded-full mb-4" />
               <h2 className="text-xl sm:text-2xl font-medium text-white mb-3">Conclusion</h2>
               <div className="text-gray-300 text-sm sm:text-base space-y-3">
                 <p>
@@ -338,88 +337,6 @@ export default function DocsPage() {
               </div>
             </section>
           </main>
-
-          {/* Table of contents (right rail) */}
-          <aside className="hidden lg:block">
-            <nav className="sticky top-6 rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl p-4 tc-glow-blue">
-              <div className="text-xs uppercase tracking-wide text-white/60 mb-2">On this page</div>
-              <div className="space-y-1">
-                <Link href="#abstract" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">Abstract</Link>
-                <Link href="#introduction" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">1. Introduction</Link>
-                <div className="pt-1">
-                  <Link href="#technical-architecture" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">2. Technical Architecture</Link>
-                  <div className="ml-3 mt-1 space-y-1">
-                    <Link href="#current-stack" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">2.1 Current Stack</Link>
-                    <Link href="#data-architecture" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">2.2 Data Architecture</Link>
-                    <Link href="#verification-workflow" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">2.3 Verification Workflow</Link>
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <Link href="#coinbase-cdp" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">3. Coinbase CDP Benefits</Link>
-                  <div className="ml-3 mt-1 space-y-1">
-                    <Link href="#base-advantages" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">3.1 Base Advantages</Link>
-                    <Link href="#coinbase-wallet" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">3.2 Coinbase Wallet</Link>
-                    <Link href="#onramp" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">3.3 Onramp</Link>
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <Link href="#security-model" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">4. Security Model</Link>
-                  <div className="ml-3 mt-1 space-y-1">
-                    <Link href="#attack-vectors" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">4.1 Attack Vectors</Link>
-                    <Link href="#remaining-challenges" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">4.2 Remaining Challenges</Link>
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <Link href="#target-markets" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">5. Target Markets</Link>
-                  <div className="ml-3 mt-1 space-y-1">
-                    <Link href="#journalism-media" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">5.1 Journalism & Media</Link>
-                    <Link href="#insurance-legal" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">5.2 Insurance & Legal</Link>
-                    <Link href="#ecommerce-marketplaces" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">5.3 E-commerce & Marketplaces</Link>
-                    <Link href="#social-platforms" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">5.4 Social Platforms</Link>
-                    <Link href="#implementation-examples" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">5.5 Examples</Link>
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <Link href="#user-experience" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">6. User Experience</Link>
-                  <div className="ml-3 mt-1 space-y-1">
-                    <Link href="#capture-flow" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">6.1 Capture Flow</Link>
-                    <Link href="#verification-interface" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">6.2 Verification Interface</Link>
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <Link href="#technical-innovation" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">7. Technical Innovation</Link>
-                  <div className="ml-3 mt-1 space-y-1">
-                    <Link href="#near-term-enhancements" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">7.1 Near-Term Enhancements</Link>
-                    <Link href="#advanced-features" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">7.2 Advanced Features</Link>
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <Link href="#competitive-landscape" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">8. Competitive Landscape</Link>
-                </div>
-                <div className="pt-1">
-                  <Link href="#success-metrics" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">9. Success Metrics</Link>
-                  <div className="ml-3 mt-1 space-y-1">
-                    <Link href="#technical-performance" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">9.1 Technical Performance</Link>
-                    <Link href="#adoption-indicators" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">9.2 Adoption Indicators</Link>
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <Link href="#implementation-roadmap" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">10. Implementation Roadmap</Link>
-                  <div className="ml-3 mt-1 space-y-1">
-                    <Link href="#hackathon-mvp" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">10.1 Hackathon MVP</Link>
-                    <Link href="#near-term-development" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">10.2 Near-Term Development</Link>
-                    <Link href="#long-term-vision" className="block px-3 py-1 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/5">10.3 Long-Term Vision</Link>
-                  </div>
-                </div>
-                <Link href="#vision" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">Vision</Link>
-                <Link href="#principles" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">Principles</Link>
-                <Link href="#how" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">How it works</Link>
-                <Link href="#api" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">API & Contracts</Link>
-                <Link href="#roadmap" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">Roadmap</Link>
-                <Link href="#conclusion" className="block px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5">Conclusion</Link>
-              </div>
-            </nav>
-          </aside>
         </div>
       </div>
     </div>
