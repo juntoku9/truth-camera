@@ -4,6 +4,7 @@ import "./globals.css";
 import "@coinbase/onchainkit/styles.css";
 import { MiniKitContextProvider } from '../providers/MiniKitProvider';
 import { Web3Provider } from './providers/Web3Provider';
+import { GlobalHomeButton } from './components/GlobalHomeButton';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,6 +61,7 @@ export default function RootLayout({
       >
         <Web3Provider>
           <MiniKitContextProvider>
+            <GlobalHomeButton />
             {children}
           </MiniKitContextProvider>
         </Web3Provider>

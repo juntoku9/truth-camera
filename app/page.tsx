@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from "next/link";
-import { CameraIcon, ShieldCheckIcon, DocumentMagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { CameraIcon, ShieldCheckIcon, DocumentMagnifyingGlassIcon, BookOpenIcon } from "@heroicons/react/24/outline";
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
 import { WalletConnect } from './components/WalletConnect';
 
@@ -36,11 +36,21 @@ export default function Home() {
         {/* Hero */}
         <div className="flex items-center justify-between mb-6 sm:mb-10">
           <span className="px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 text-white/80 bg-white/5">Research Prototype</span>
-          <WalletConnect />
+          <div className="flex items-center gap-4">
+            <Link href="/docs" className="text-sm text-white/80 hover:text-white transition-colors">Docs</Link>
+            <WalletConnect />
+          </div>
         </div>
 
         <div className="text-center mb-10 sm:mb-14">
-          <div className="flex justify-center">
+          <div className="relative flex justify-center">
+            {/* Orange under-glow beneath wordmark */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -bottom-6 sm:-bottom-8 left-1/2 -translate-x-1/2"
+            >
+              <div className="h-16 sm:h-20 w-[min(96%,780px)] rounded-full blur-2xl bg-[radial-gradient(closest-side,rgba(255,77,0,0.45),rgba(255,77,0,0))]" />
+            </div>
             <Image
               src={wordmarkImage}
               alt="Truth Camera logo"
@@ -54,6 +64,12 @@ export default function Home() {
           <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto">
             Minimal camera-first tool for cryptographic image provenance. Capture or verify with a clean, tamper-resistant flow.
           </p>
+          <div className="mt-5">
+            <Link href="/docs" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl tc-btn-orange text-sm sm:text-base">
+              <BookOpenIcon className="h-4 w-4" />
+              Read the Docs
+            </Link>
+          </div>
         </div>
 
         {/* Main Actions */}
