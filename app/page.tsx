@@ -64,7 +64,26 @@ export default function Home() {
           <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto">
             Minimal camera-first tool for cryptographic image provenance. Capture or verify with a clean, tamper-resistant flow.
           </p>
-          <div className="mt-5">
+          <div className="mt-5 flex items-center justify-center gap-3">
+            <a
+              href="https://x.com/truth_camera_"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Truth Camera on X"
+              title="Follow on X"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl tc-btn-blue text-sm sm:text-base"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="h-4 w-4"
+                aria-hidden="true"
+              >
+                <path d="M18.243 3H21l-6.52 7.45L22.5 21h-5.657l-4.43-5.188L6.2 21H3.44l6.93-7.913L1.5 3h5.777l4.016 4.81L18.243 3Zm-2.017 16.2h1.566L8.852 5.7H7.18l9.046 13.5Z"/>
+              </svg>
+              <span>Follow on X</span>
+            </a>
             <Link href="/docs" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl tc-btn-orange text-sm sm:text-base">
               <BookOpenIcon className="h-4 w-4" />
               Read the Docs

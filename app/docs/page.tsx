@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { BookOpenIcon } from '@heroicons/react/24/outline';
+import Mermaid from '../components/Mermaid';
 
 export const metadata: Metadata = {
   title: 'Docs',
@@ -232,6 +233,13 @@ export default function DocsPage() {
                   <p className="mt-2">
                     Our design philosophy eliminates blockchain jargon in favor of plain language that explains the verification process in terms users already understand.
                   </p>
+                </div>
+                <div id="ux-flowchart">
+                  <h3 className="text-white font-medium mb-1">6.3 Flowchart</h3>
+                  <Mermaid
+                    className="rounded-xl border border-white/10 bg-black/40 p-3"
+                    chart={`flowchart TD\n    A([User Opens Truth Camera]) --> B([Connect Wallet])\n    B --> C{Wallet Connected?}\n    C -->|No| D([Show Privy Login or Inject Coinbase Wallet])\n    D --> B\n    C -->|Yes| E([Camera Interface Ready])\n\n    E --> F([User Takes Photo])\n    F --> G([Camera-Only Capture\\nNo Gallery Uploads])\n    G --> H([Compute SHA-256 Hash\\nin Browser])\n    H --> I([Submit Hash to\\nBase Smart Contract])\n    I --> J([Transaction Confirmed])\n    J --> K([Show Proof Certificate\\nwith Basescan Link])\n\n    K --> L([Photo Saved to\\nFiles App])\n\n    %% Verification Flow\n    M([Verification Mode]) --> N([User Drags Image\\ninto Interface])\n    N --> O([Re-compute SHA-256\\nof Dropped Image])\n    O --> P([Query Smart Contract\\non Base])\n    P --> Q{Proof Found?}\n    Q -->|Yes| R([Show Verification Success\\nTimestamp and Submitter])\n    Q -->|No| S([Show Not Verified\\nNo Proof Found])\n    R --> T([Block Explorer Link\\nfor Transparency])\n    S --> U([Suggest Taking Photo\\nwith Truth Camera])\n\n    %% Styling\n    classDef captureFlow fill:#e1f5fe\n    classDef verifyFlow fill:#f3e5f5\n    classDef decision fill:#fff3e0\n    classDef success fill:#e8f5e8\n    classDef error fill:#ffebee\n\n    class A,B,E,F,G,H,I,J,K,L captureFlow\n    class M,N,O,P,T,U verifyFlow\n    class C,Q decision\n    class R,K success\n    class S error`}
+                  />
                 </div>
               </div>
             </section>
