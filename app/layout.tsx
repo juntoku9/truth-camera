@@ -27,6 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "Truth Camera",
     description:
       "Minimal camera-first tool for cryptographic image provenance. Capture or verify with a clean, tamper-resistant flow.",
+    // Use app/icon.png automatic favicon; remove explicit URLs to avoid cache confusion
     other: {
       "fc:frame": JSON.stringify({
         version: "next",
