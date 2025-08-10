@@ -23,7 +23,7 @@ export async function GET() {
     frame: {
       ...withValidProperties({
         version: "1",
-        name: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME,
+        name: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "Truth Camera",
         subtitle: process.env.NEXT_PUBLIC_APP_SUBTITLE,
         description: process.env.NEXT_PUBLIC_APP_DESCRIPTION,
         screenshotUrls: [],
@@ -31,7 +31,7 @@ export async function GET() {
         splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE,
         splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR,
         homeUrl: URL,
-        webhookUrl: `${URL}/api/webhook`,
+        webhookUrl: URL ? `${URL}/api/webhook` : undefined,
         primaryCategory: process.env.NEXT_PUBLIC_APP_PRIMARY_CATEGORY,
         tags: [],
         heroImageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
@@ -41,7 +41,7 @@ export async function GET() {
         ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE,
       }),
       // use only while testing
-      "noindex": true
+      noindex: true,
     },
   });
 } 

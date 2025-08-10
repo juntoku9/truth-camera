@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Permanent_Marker } from "next/font/google";
 import "./globals.css";
+import "@coinbase/onchainkit/styles.css";
 import { MiniKitContextProvider } from '../providers/MiniKitProvider';
 import { Web3Provider } from './providers/Web3Provider';
 

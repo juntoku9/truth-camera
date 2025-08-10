@@ -17,9 +17,14 @@ export function useBlockchain() {
   const { ready, authenticated } = usePrivy();
   const { wallets } = useWallets();
 
+  // Privy connection state
   const connectedWallet = wallets?.[0];
-  const connectedAddress = connectedWallet?.address ?? "";
-  const isConnected = !!(ready && authenticated && connectedWallet);
+  const privyAddress = connectedWallet?.address ?? "";
+  const isPrivyConnected = !!(ready && authenticated && connectedWallet);
+
+  // Injected provider (Coinbase Wallet / Smart Wallet inside Base App) state
+  const [injectedConnected, setInjectedConnected] = useState(false);
+  const [injectedAddress, setInjectedAddress] = useState("");
 
   const [contract, setContract] = useState<TruthCameraContract | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,20 +46,32 @@ export function useBlockchain() {
     return null;
   }, [connectedWallet]);
 
-  // Build an ethers Provider from Privy's EIP-1193 provider, or fallback to public Base RPC
+  // Helper: get injected EIP-1193 provider (window.ethereum)
+  const getInjectedEip1193 = useCallback((): any | null => {
+    if (typeof window === "undefined") return null;
+    const eth = (window as any).ethereum;
+    if (eth && typeof eth.request === "function") return eth;
+    return null;
+  }, []);
+
+  // Build an ethers Provider from Privy or injected provider, else fallback to public Base RPC
   const buildProvider = useCallback(async () => {
     const eip1193 = await getWalletEip1193();
     if (eip1193) {
       return new ethers.BrowserProvider(eip1193 as any);
     }
+    const injected = getInjectedEip1193();
+    if (injected) {
+      return new ethers.BrowserProvider(injected as any);
+    }
     // Fallback read-only provider for Base
     return new ethers.JsonRpcProvider(BASE_RPC_URL);
-  }, [getWalletEip1193]);
+  }, [getWalletEip1193, getInjectedEip1193]);
 
   // Ensure Base mainnet on the connected wallet (no-ops for read-only)
   const ensureBase = useCallback(async (): Promise<boolean> => {
     try {
-      const eip1193 = await getWalletEip1193();
+      const eip1193 = (await getWalletEip1193()) || getInjectedEip1193();
       if (!eip1193) return true; // read-only or no wallet provider; allow read
       const chainIdHex = await (eip1193 as any).request({ method: "eth_chainId" });
       if (chainIdHex?.toLowerCase() === BASE_CHAIN_ID_HEX.toLowerCase()) return true;
@@ -91,7 +108,39 @@ export function useBlockchain() {
       setError("Wrong network. Please switch your wallet to Base.");
       return false;
     }
-  }, [getWalletEip1193]);
+  }, [getWalletEip1193, getInjectedEip1193]);
+
+  // Track injected provider connection state
+  useEffect(() => {
+    const injected = getInjectedEip1193();
+    if (!injected) {
+      setInjectedConnected(false);
+      setInjectedAddress("");
+      return;
+    }
+
+    let active = true;
+
+    const updateFromAccounts = (accounts: string[]) => {
+      if (!active) return;
+      const addr = accounts?.[0] || "";
+      setInjectedConnected(!!addr);
+      setInjectedAddress(addr);
+    };
+
+    // Try passive read of accounts (won't prompt)
+    injected.request({ method: "eth_accounts" })
+      .then((accounts: string[]) => updateFromAccounts(accounts))
+      .catch(() => updateFromAccounts([]));
+
+    const onAccountsChanged = (accounts: string[]) => updateFromAccounts(accounts);
+    injected.on?.("accountsChanged", onAccountsChanged);
+
+    return () => {
+      active = false;
+      try { injected.removeListener?.("accountsChanged", onAccountsChanged); } catch {}
+    };
+  }, [getInjectedEip1193]);
 
   // Initialize (or reinitialize) the contract whenever connection changes
   useEffect(() => {
@@ -105,16 +154,23 @@ export function useBlockchain() {
       }
       try {
         const provider = await buildProvider();
-        if (isConnected) {
-          // Only create signer if wallet provider is available
+        // Prioritize Privy signer if connected
+        if (isPrivyConnected) {
           const eip1193 = await getWalletEip1193();
-          if (!eip1193) {
-            setError("Wallet provider not ready. Please try reconnecting.");
+          if (eip1193) {
+            const signer = await (new ethers.BrowserProvider(eip1193 as any)).getSigner();
+            setContract(new TruthCameraContract(provider, signer));
+          } else {
             setContract(new TruthCameraContract(provider));
-            return;
           }
-          const signer = await (new ethers.BrowserProvider(eip1193 as any)).getSigner();
-          setContract(new TruthCameraContract(provider, signer));
+        } else if (injectedConnected) {
+          const injected = getInjectedEip1193();
+          if (injected) {
+            const signer = await (new ethers.BrowserProvider(injected as any)).getSigner();
+            setContract(new TruthCameraContract(provider, signer));
+          } else {
+            setContract(new TruthCameraContract(provider));
+          }
         } else {
           setContract(new TruthCameraContract(provider));
         }
@@ -126,13 +182,13 @@ export function useBlockchain() {
       }
     };
     init();
-  }, [isConnected, connectedWallet, buildProvider, getWalletEip1193]);
+  }, [isPrivyConnected, connectedWallet, injectedConnected, buildProvider, getWalletEip1193, getInjectedEip1193]);
 
   // Submit proof to blockchain using Privy wallet signer
   const submitProof = useCallback(
     async (imageHash: string): Promise<string> => {
       if (!contract) throw new Error("Contract not initialized.");
-      if (!isConnected) throw new Error("Wallet not connected.");
+      if (!isPrivyConnected && !injectedConnected) throw new Error("Wallet not connected.");
 
       const ok = await ensureBase();
       if (!ok) throw new Error("Please switch your wallet to Base.");
@@ -169,7 +225,7 @@ export function useBlockchain() {
         setIsLoading(false);
       }
     },
-    [contract, isConnected, ensureBase, buildProvider]
+    [contract, isPrivyConnected, injectedConnected, ensureBase, buildProvider]
   );
 
   // Verify proof (read-only is fine)
@@ -199,8 +255,8 @@ export function useBlockchain() {
 
   // Keep API shape stable: function that returns boolean
   const canSubmitProofs = useCallback(
-    () => !!(contract && isConnected && connectedAddress),
-    [contract, isConnected, connectedAddress]
+    () => !!(contract && (isPrivyConnected || injectedConnected) && (privyAddress || injectedAddress)),
+    [contract, isPrivyConnected, injectedConnected, privyAddress, injectedAddress]
   );
 
   const getContractAddress = useCallback(
@@ -208,9 +264,12 @@ export function useBlockchain() {
     []
   );
 
+  const isConnected = isPrivyConnected || injectedConnected;
+  const address = (privyAddress || injectedAddress) as string;
+
   return {
     isConnected,
-    address: connectedAddress,
+    address,
     isLoading,
     error,
     contract,
