@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { WalletConnect } from '../components/WalletConnect';
-import { CameraIcon, ShieldCheckIcon, DocumentMagnifyingGlassIcon, PhotoIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { WalletConnect, WalletStatus } from '../components/WalletConnect';
+import { CameraIcon, ShieldCheckIcon, DocumentMagnifyingGlassIcon, PhotoIcon, EyeIcon, LockClosedIcon, ExclamationTriangleIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { TruthCamera } from '../components/TruthCamera';
+import { useBlockchain } from '../hooks/useBlockchain';
 
 type TabKey = 'capture' | 'verify';
 
 export default function StartPage() {
   const [tab, setTab] = useState<TabKey>('capture');
+  const { isConnected } = useBlockchain();
 
   return (
     <div className="min-h-screen bg-hero-dark">
@@ -22,7 +25,7 @@ export default function StartPage() {
             <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-emerald-500/10 border border-emerald-300/20">
               <ShieldCheckIcon className="h-5 w-5 text-emerald-300" />
             </div>
-            <span className="hidden sm:inline text-slate-200 text-sm font-medium">Truth Camera</span>
+            <Link href="/" className="hidden sm:inline text-slate-200 text-sm font-medium hover:text-slate-100">Truth Camera</Link>
           </div>
           <div className="flex items-center gap-3">
             <span className="pill px-2.5 py-1 text-xs">Secure Zone</span>
@@ -33,8 +36,15 @@ export default function StartPage() {
 
       <div className="page-container mx-auto max-w-6xl py-8 sm:py-12">
         {/* Tabs */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="tab-container-dark inline-flex">
+        <div className="relative mb-8">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2">
+            <Link href="/" className="flex items-center text-cyan-300 hover:text-cyan-200 transition-colors">
+              <ArrowLeftIcon className="h-5 w-5" />
+              <span className="hidden sm:inline ml-1">Back</span>
+            </Link>
+          </div>
+          <div className="flex justify-center">
+            <div className="tab-container-dark inline-flex">
             <button
               className={`tab-btn ${tab === 'capture' ? 'tab-btn-active' : ''}`}
               onClick={() => setTab('capture')}
@@ -47,6 +57,7 @@ export default function StartPage() {
             >
               verify
             </button>
+            </div>
           </div>
         </div>
 
@@ -66,23 +77,16 @@ export default function StartPage() {
                   </div>
                 </div>
               </div>
-              <div className="text-cyan-300 text-sm uppercase tracking-wider">LIVE</div>
+              
             </div>
 
-            <div className="panel-dark aspect-[16/10] flex items-center justify-center">
-              <div className="text-center px-6">
-                <CameraIcon className="h-12 w-12 text-cyan-300 mx-auto mb-4" />
-                <h2 className="text-slate-100 text-xl sm:text-2xl mb-2">Camera Capture</h2>
-                <p className="text-slate-300 text-sm max-w-md mx-auto">Direct sensor capture prevents pre-manipulation and ensures integrity from the source.</p>
+            {/* Wallet status moved inside TruthCamera */}
+
+            <div className="panel-dark rounded-b-[16px] px-6 pb-6">
+              <TruthCamera autoStart={false} />
+              <div className="mt-4 text-[12px] tracking-widest text-slate-400 flex items-center justify-center gap-2">
+                <LockClosedIcon className="h-3.5 w-3.5" /> PRIVACY GUARANTEED · LOCAL PROCESSING ONLY
               </div>
-            </div>
-            <div className="flex items-center justify-center gap-3 p-4 border-t border-white/10 bg-gradient-to-b from-white/5 to-transparent">
-              <Link href="/upload" className="inline-flex">
-                <span className="cta-dark px-5 py-2.5 text-sm inline-flex items-center gap-2"><PhotoIcon className="h-5 w-5" /> Open Capture</span>
-              </Link>
-              <Link href="/verify" className="inline-flex">
-                <span className="pill px-5 py-2.5 text-sm">Go to Verify</span>
-              </Link>
             </div>
           </div>
         )}
@@ -154,4 +158,6 @@ function VerifyInline() {
     </div>
   );
 }
+
+// Removed inline camera component to rely on the stable /upload flow
 
