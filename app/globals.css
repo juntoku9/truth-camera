@@ -244,6 +244,25 @@ body {
   box-shadow: var(--tc-shadow-glow-cyan-soft);
 }
 
+/* Privy modal: keep it centered, not full-screen */
+div[id*="privy"], div[id*="Privy"], div[data-privy-root] {
+  display: grid;
+  place-items: center;
+}
+div[id*="privy"] [role="dialog"],
+div[id*="Privy"] [role="dialog"],
+div[data-privy-root] [role="dialog"] {
+  width: min(420px, calc(100% - 2rem));
+  max-height: min(80vh, 640px);
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+div[id*="privy"] [role="dialog"] > *,
+div[id*="Privy"] [role="dialog"] > *,
+div[data-privy-root] [role="dialog"] > * {
+  max-height: inherit;
+}
+
 /* Code blocks */
 .code-block {
   font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
