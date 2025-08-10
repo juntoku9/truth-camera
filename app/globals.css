@@ -22,6 +22,8 @@
   --tc-blue: #60a5fa;
   --tc-violet: #a78bfa;
   --tc-accent-orange: #f97316; /* micro glows only */
+  --tc-orange-neon: #ff6a00;
+  --tc-blue-neon: #28a5ff;
 
   /* Gradients */
   --tc-gradient-cta: linear-gradient(135deg, #0891b2 0%, #06b6d4 55%, #22d3ee 100%);
@@ -61,9 +63,7 @@ html, body {
 
 body {
   color: var(--tc-text-primary);
-  background: radial-gradient(1200px 700px at 20% -10%, rgba(34, 211, 238, 0.08), transparent 60%),
-              radial-gradient(900px 600px at 80% -20%, rgba(16, 185, 129, 0.08), transparent 60%),
-              linear-gradient(180deg, var(--tc-bg-start), var(--tc-bg-end));
+  background: linear-gradient(180deg, var(--tc-bg-start), var(--tc-bg-end));
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial;
 }
 
@@ -82,9 +82,7 @@ body {
 
 /* Utilities */
 .bg-hero-dark {
-  background: radial-gradient(1200px 700px at 20% -10%, rgba(34, 211, 238, 0.12), transparent 60%),
-              radial-gradient(900px 600px at 80% -20%, rgba(16, 185, 129, 0.12), transparent 60%),
-              linear-gradient(180deg, var(--tc-bg-start), var(--tc-bg-end));
+  background: linear-gradient(180deg, var(--tc-bg-start), var(--tc-bg-end));
 }
 
 .panel-dark {
@@ -123,6 +121,72 @@ body {
 .cta-dark:hover { filter: brightness(1.05); }
 .cta-dark:active { transform: translateY(1px); }
 
+/* Hero CTA with subtle orange accent + shine */
+.cta-hero {
+  position: relative;
+  background: var(--tc-gradient-cta);
+  color: white;
+  border-radius: var(--tc-radius-pill);
+  box-shadow: var(--tc-shadow-glow-cyan-soft), 0 6px 20px rgba(249, 115, 22, 0.12);
+  border: 1px solid rgba(249, 115, 22, 0.18);
+  transition: transform 200ms ease-out, filter 200ms ease-out, box-shadow 200ms ease-out;
+  overflow: hidden;
+}
+.cta-hero:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow: var(--tc-shadow-glow-cyan-soft), 0 10px 30px rgba(249, 115, 22, 0.22);
+}
+.cta-hero:active { transform: translateY(0); }
+.cta-hero::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -150%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+  transform: skewX(-20deg);
+  transition: left 700ms ease;
+}
+.cta-hero:hover::after { left: 160%; }
+
+.neon-text-orange {
+  color: var(--tc-orange-neon);
+  text-shadow:
+    0 0 12px rgba(255, 106, 0, 0.45),
+    0 0 30px rgba(255, 106, 0, 0.35);
+}
+
+.neon-text-blue {
+  color: var(--tc-blue-neon);
+  text-shadow:
+    0 0 12px rgba(40, 165, 255, 0.45),
+    0 0 30px rgba(40, 165, 255, 0.35);
+}
+
+/* Hero lens constructed from CSS rings */
+.hero-lens {
+  width: 220px;
+  height: 220px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 50% 50%, rgba(40,165,255,0.35), rgba(40,165,255,0.08) 35%, transparent 36%),
+              radial-gradient(circle at 50% 50%, rgba(0,0,0,0.6) 0%, transparent 62%);
+  box-shadow:
+    0 0 0 2px rgba(40,165,255,0.35) inset,
+    0 0 0 6px rgba(40,165,255,0.15) inset,
+    0 0 0 12px rgba(255,106,0,0.18) inset,
+    0 0 40px rgba(40,165,255,0.25),
+    0 0 120px rgba(40,165,255,0.18);
+}
+@media (min-width: 640px) {
+  .hero-lens { width: 260px; height: 260px; }
+}
+
+.hero-title {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 0.9;
+}
+
 .pill {
   background: rgba(9, 14, 22, 0.55);
   color: var(--tc-text-primary);
@@ -156,6 +220,8 @@ body {
 .glow-orange-soft {
   box-shadow: 0 6px 24px rgba(249, 115, 22, 0.25), 0 2px 8px rgba(249, 115, 22, 0.18);
 }
+
+/* removed experimental guilloche/banknote classes */
 
 /* Tabs */
 .tab-container-dark {

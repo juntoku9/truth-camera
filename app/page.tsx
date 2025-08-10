@@ -35,16 +35,14 @@ export default function Home() {
 
         {/* Hero */}
         <div className="text-center mb-10 sm:mb-14">
-          <div className="flex justify-center mb-4 sm:mb-6">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center bg-cyan-500/10 border border-cyan-300/20">
-              <CameraIcon className="icon-7 text-cyan-300" />
-            </div>
+          <div className="flex justify-center mb-6">
+            <div className="hero-lens" />
           </div>
-          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-slate-100">
-            <span className="text-accent-gradient">Truth Camera</span>
+          <h1 className="hero-title text-4xl sm:text-5xl tracking-tight">
+            <span className="neon-text-orange">TRUTH</span> <span className="neon-text-blue">CAMERA</span>
           </h1>
           <p className="mt-4 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto">
-            Advanced cryptographic verification for uncompromising image authenticity.
+            Minimal camera-first tool for cryptographic image provenance. Capture or verify with a clean, tamper-resistant flow.
           </p>
         </div>
 
@@ -61,7 +59,7 @@ export default function Home() {
         {/* CTA */}
         <div className="text-center mb-12">
           <Link href="/start" className="inline-flex">
-            <span className="cta-dark px-6 py-3 text-sm font-medium">Enter Secure Zone</span>
+            <span className="cta-hero px-7 sm:px-8 py-3.5 text-base font-medium">Enter Secure Zone</span>
           </Link>
           <div className="text-slate-400 text-xs mt-3">Zero-knowledge cryptographic verification • No data leaves your device</div>
         </div>
