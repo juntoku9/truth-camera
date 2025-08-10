@@ -382,7 +382,7 @@ export default function UploadPage() {
         submitter: address || '',
         timestamp: Math.floor(Date.now() / 1000)
       });
-      setCapturedImage(null);
+      // Keep the captured image visible so users can still download it
     } catch (err: any) {
       if (err.message.includes('already submitted')) {
         setError('This image hash has already been submitted to the blockchain.');
@@ -474,8 +474,7 @@ export default function UploadPage() {
         </div>
 
         <div className="max-w-3xl mx-auto space-y-6">
-          {!proof ? (
-            <>
+          <>
               {/* Idle State */}
               {!isCameraActive && !capturedImage && (
                 <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl tc-glow-orange p-8">
@@ -646,102 +645,58 @@ export default function UploadPage() {
                 </div>
               )}
             </>
-          ) : (
-            /* Proof Results */
+
+          {/* Proof Results (rendered beneath the captured image) */}
+          {proof && (
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8">
               <div className="flex items-center mb-6">
                 <CheckCircleIcon className="h-6 w-6 sm:h-7 sm:w-7 text-emerald-400 mr-3" />
-                <h2 className="text-xl sm:text-2xl font-medium text-white">
-                  Authentic Photo Proof Generated
-                </h2>
+                <h2 className="text-xl sm:text-2xl font-medium text-white">Authentic Photo Proof Generated</h2>
               </div>
 
               <div className="space-y-5">
-                {/* Image Hash */}
                 <div>
-                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
-                    Image Hash (SHA-256)
-                  </label>
+                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">Image Hash (SHA-256)</label>
                   <div className="flex items-center space-x-2">
-                    <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">
-                      {proof.hash}
-                    </code>
-                    <button
-                      onClick={() => copyToClipboard(proof.hash)}
-                      className="flex-shrink-0 p-2 text-gray-300 hover:text-white"
-                      title="Copy hash"
-                    >
+                    <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">{proof.hash}</code>
+                    <button onClick={() => copyToClipboard(proof.hash)} className="flex-shrink-0 p-2 text-gray-300 hover:text-white" title="Copy hash">
                       <DocumentDuplicateIcon className="h-5 w-5" />
                     </button>
                   </div>
                 </div>
 
-                {/* Transaction Hash */}
                 <div>
                   <label className="block text-sm font-medium text-emerald-300 mb-1">Transaction Hash</label>
                   <div className="flex items-center gap-2">
-                    <code className="flex-1 px-3 py-2 bg-black/20 border border-emerald-500/20 rounded-lg text-emerald-200 text-xs sm:text-sm font-mono break-all">
-                      {proof.transactionHash}
-                    </code>
-                    <button
-                      onClick={() => copyToClipboard(proof.transactionHash)}
-                      className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors"
-                      title="Copy transaction hash"
-                    >
+                    <code className="flex-1 px-3 py-2 bg-black/20 border border-emerald-500/20 rounded-lg text-emerald-200 text-xs sm:text-sm font-mono break-all">{proof.transactionHash}</code>
+                    <button onClick={() => copyToClipboard(proof.transactionHash)} className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors" title="Copy transaction hash">
                       <DocumentDuplicateIcon className="h-4 w-4 text-emerald-400" />
                     </button>
-                    <a
-                      href={getExplorerTxUrl(proof.transactionHash)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white"
-                      title="Open in Basescan"
-                    >
+                    <a href={getExplorerTxUrl(proof.transactionHash)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white" title="Open in Basescan">
                       Open
                     </a>
                   </div>
                 </div>
 
-                {/* Blockchain Details */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
-                      Submitter
-                    </label>
+                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">Submitter</label>
                     <p className="text-gray-100 text-sm sm:text-base font-mono">{formatAddress(proof.submitter)}</p>
                   </div>
                   <div>
-                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
-                      Timestamp
-                    </label>
+                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">Timestamp</label>
                     <p className="text-gray-100 text-sm sm:text-base">{formatTimestamp(proof.timestamp)}</p>
                   </div>
                 </div>
 
-                {/* Status */}
                 <div>
-                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
-                    Authenticity Status
-                  </label>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
-                    Blockchain Verified ✓
-                  </span>
+                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">Authenticity Status</label>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">Blockchain Verified ✓</span>
                 </div>
 
-                {/* Actions */}
                 <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-2">
-                  <button
-                    onClick={() => setProof(null)}
-                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 transition-colors text-center"
-                  >
-                    Take Another Photo
-                  </button>
-                  <Link
-                    href="/verify"
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white transition-colors text-center"
-                  >
-                    Verify an Image
-                  </Link>
+                  <button onClick={() => { setProof(null); }} className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 transition-colors text-center">Take Another Photo</button>
+                  <Link href="/verify" className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white transition-colors text-center">Verify an Image</Link>
                 </div>
               </div>
             </div>

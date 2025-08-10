@@ -93,8 +93,11 @@ export class TruthCameraContract {
       // Estimate gas first to catch any revert early
       const gasEstimate = await this.contract.submit.estimateGas(bytes32Hash);
       console.log('Gas estimate:', gasEstimate.toString());
-      
-      const tx = await this.contract.submit(bytes32Hash);
+
+      // Provide an explicit gas limit with a small safety margin to avoid
+      // providers/wallets picking too-low defaults.
+      const gasLimit = (gasEstimate * 120n) / 100n; // +20%
+      const tx = await this.contract.submit(bytes32Hash, { gasLimit });
       console.log('Transaction sent:', tx.hash);
       
       const receipt = await tx.wait();
