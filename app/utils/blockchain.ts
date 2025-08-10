@@ -114,9 +114,7 @@ export class TruthCameraContract {
   async verifyProof(hash: string): Promise<BlockchainProof> {
     // Convert hex hash to bytes32
     const bytes32Hash = ethers.zeroPadValue(`0x${hash}`, 32);
-    
     const [exists, submitter, timestamp] = await this.contract.verify(bytes32Hash);
-    
     return {
       exists,
       submitter,
