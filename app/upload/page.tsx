@@ -27,6 +27,7 @@ export default function UploadPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  const CAPTURE_STORAGE_KEY = 'truth-camera:last-captured-data-url';
 
   // Blockchain hook
   const {
@@ -55,10 +56,28 @@ export default function UploadPage() {
     if (capturedImage) {
       console.log('Captured image state updated, length:', capturedImage.length);
       console.log('Image preview (first 100 chars):', capturedImage.substring(0, 100));
+      try {
+        sessionStorage.setItem(CAPTURE_STORAGE_KEY, capturedImage);
+      } catch {}
     } else {
       console.log('Captured image state cleared');
+      try {
+        sessionStorage.removeItem(CAPTURE_STORAGE_KEY);
+      } catch {}
     }
   }, [capturedImage]);
+
+  // Restore captured image in case of remount (e.g., wallet flow reloads providers)
+  useEffect(() => {
+    if (!capturedImage) {
+      try {
+        const saved = sessionStorage.getItem(CAPTURE_STORAGE_KEY);
+        if (saved) {
+          setCapturedImage(saved);
+        }
+      } catch {}
+    }
+  }, []);
 
   const startCamera = useCallback(async () => {
     setCameraError(null);
