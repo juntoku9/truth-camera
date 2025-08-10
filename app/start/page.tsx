@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { WalletConnect } from '../components/WalletConnect';
-import { CameraIcon, ShieldCheckIcon, DocumentMagnifyingGlassIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import { CameraIcon, ShieldCheckIcon, DocumentMagnifyingGlassIcon, PhotoIcon, EyeIcon } from '@heroicons/react/24/outline';
 
 type TabKey = 'capture' | 'verify';
 
@@ -89,19 +89,67 @@ export default function StartPage() {
 
         {/* Verify Section */}
         {tab === 'verify' && (
-          <div className="card-dark rounded-[16px] p-10 text-center">
-            <div className="mx-auto w-full max-w-xl">
-              <div className="mb-6">
-                <DocumentMagnifyingGlassIcon className="h-12 w-12 text-emerald-300 mx-auto mb-3" />
-                <h2 className="text-slate-100 text-xl sm:text-2xl mb-2">Verify Image Authenticity</h2>
-                <p className="text-slate-300 text-sm">Drag-and-drop verification is available in the Verify flow.</p>
+          <div className="card-dark rounded-[16px] overflow-hidden">
+            {/* Header bar */}
+            <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-300/20 flex items-center justify-center" style={{ boxShadow: 'var(--tc-shadow-glow-cyan-soft)' }}>
+                  <ShieldCheckIcon className="h-6 w-6 text-emerald-300" />
+                </div>
+                <div>
+                  <div className="text-slate-100 text-xl font-semibold">Verify Authenticity</div>
+                  <div className="text-slate-400 text-[12px] tracking-widest mt-1">
+                    UPLOAD <span className="mx-2">→</span> HASH <span className="mx-2">→</span> COMPARE <span className="mx-2">→</span> VERIFY <span className="mx-2">→</span> AUTHENTICATE
+                  </div>
+                </div>
               </div>
-              <Link href="/verify" className="inline-flex">
-                <span className="cta-dark px-6 py-3 text-sm">Open Verify</span>
-              </Link>
+              <div className="flex items-center gap-2 text-slate-300 text-sm uppercase tracking-wider">
+                <EyeIcon className="h-4 w-4" /> ANALYZE
+              </div>
             </div>
+            <VerifyInline />
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function VerifyInline() {
+  const [isDragging, setIsDragging] = useState(false);
+  const [isProcessing] = useState(false);
+  const fileInputId = 'inline-verify-file';
+
+  return (
+    <div className="p-10">
+      <div className="mx-auto w-full max-w-2xl">
+        <div
+          className={`relative overflow-hidden rounded-[16px] border-2 border-dashed transition-colors text-center ${
+            isDragging ? 'border-emerald-400/40 bg-emerald-500/5' : 'border-white/20 bg-white/5'
+          } backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-10`}
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+          onDrop={(e) => { e.preventDefault(); setIsDragging(false); }}
+        >
+          {isProcessing ? (
+            <div>
+              <div className="h-10 w-10 sm:h-12 sm:w-12 animate-spin rounded-full border-2 border-white/20 border-t-white mb-4 mx-auto"></div>
+              <p className="text-slate-300 text-sm sm:text-base">Verifying image on blockchain...</p>
+            </div>
+          ) : (
+            <div>
+              <DocumentMagnifyingGlassIcon className="h-12 w-12 text-emerald-300 mx-auto mb-4" />
+              <h2 className="text-slate-100 text-xl sm:text-2xl mb-2">Verify Image Authenticity</h2>
+              <p className="text-slate-300 text-sm sm:text-base mb-6">Drag and drop an image here, or click to select a file to verify against blockchain proofs.</p>
+              <input id={fileInputId} type="file" accept="image/*" className="hidden" />
+              <label htmlFor={fileInputId} className="inline-flex items-center gap-2 cta-dark px-6 py-3 text-sm cursor-pointer">
+                <DocumentMagnifyingGlassIcon className="h-5 w-5" />
+                Select Image to Verify
+              </label>
+              <div className="mt-6 text-xs text-emerald-300/80">Supports JPG, PNG, WebP (max 10MB)</div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
