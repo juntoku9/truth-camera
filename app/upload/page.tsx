@@ -79,6 +79,16 @@ export default function UploadPage() {
     }
   }, []);
 
+  // If proof arrives but preview is missing (e.g., page remounted), try to restore
+  useEffect(() => {
+    if (proof && !capturedImage) {
+      try {
+        const saved = sessionStorage.getItem(CAPTURE_STORAGE_KEY);
+        if (saved) setCapturedImage(saved);
+      } catch {}
+    }
+  }, [proof, capturedImage]);
+
   const startCamera = useCallback(async () => {
     setCameraError(null);
     
@@ -419,6 +429,7 @@ export default function UploadPage() {
 
   const retakePhoto = () => {
     setCapturedImage(null);
+    try { sessionStorage.removeItem(CAPTURE_STORAGE_KEY); } catch {}
     startCamera();
   };
 
