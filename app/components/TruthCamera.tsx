@@ -189,6 +189,25 @@ export function TruthCamera({ autoStart = false }: Props) {
     return new Blob([byteArray], { type: mime });
   }
 
+  const downloadWindowRef = useRef<Window | null>(null);
+  const lastObjectUrlRef = useRef<string | null>(null);
+  const [iosDownloadUrl, setIosDownloadUrl] = useState<string | null>(null);
+  const [isDownloadHelpOpen, setIsDownloadHelpOpen] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (downloadWindowRef.current && !downloadWindowRef.current.closed) {
+        try { downloadWindowRef.current.close(); } catch {}
+      }
+      if (lastObjectUrlRef.current) {
+        try { URL.revokeObjectURL(lastObjectUrlRef.current); } catch {}
+      }
+      if (iosDownloadUrl) {
+        try { URL.revokeObjectURL(iosDownloadUrl); } catch {}
+      }
+    };
+  }, [iosDownloadUrl]);
+
   const downloadImage = useCallback(async () => {
     if (!capturedImage) return;
     const filename = `truth-camera-${new Date().toISOString().split('T')[0]}-${Date.now()}.jpg`;
@@ -200,7 +219,27 @@ export function TruthCamera({ autoStart = false }: Props) {
         return;
       }
     } catch {}
+    // iOS Safari does not honor download attr; open in a new tab
+    const isIOS = (() => {
+      if (typeof navigator === 'undefined') return false;
+      const ua = navigator.userAgent || (navigator as any).vendor || '';
+      const isAppleTouch = (navigator as any).platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1;
+      return /iPad|iPhone|iPod/.test(ua) || isAppleTouch;
+    })();
     const objectUrl = URL.createObjectURL(blob);
+    lastObjectUrlRef.current = objectUrl;
+    if (isIOS) {
+      // Show our own lightweight modal to avoid the iOS popover getting stuck
+      if (isDownloadHelpOpen) {
+        // act as dismiss
+        setIsDownloadHelpOpen(false);
+        try { URL.revokeObjectURL(objectUrl); } catch {}
+        return;
+      }
+      setIosDownloadUrl(objectUrl);
+      setIsDownloadHelpOpen(true);
+      return;
+    }
     const link = document.createElement('a');
     link.href = objectUrl; link.download = filename;
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
@@ -273,23 +312,39 @@ export function TruthCamera({ autoStart = false }: Props) {
           )}
 
           {isCameraActive && (
-            <div className="card-dark overflow-hidden rounded-[16px]">
-              <div className="relative">
-                <div className="panel-dark aspect-[16/10] w-full bg-black/70">
-                  <video ref={videoRef} className="h-full w-full object-cover rounded-t-[16px]" playsInline muted autoPlay controls={false} />
+            <>
+              {/* Wallet status above the camera */}
+              <div className="mb-3 text-center">
+                <div className="flex items-center justify-center">
+                  <WalletStatus />
                 </div>
-                <div className="pointer-events-none absolute inset-0 rounded-t-[16px] bg-[radial-gradient(circle_at_center,transparent_0,transparent_60%,rgba(255,255,255,0.04)_100%)]" />
-                <div className="absolute top-4 left-4 text-[11px] px-2 py-1 rounded-full bg-black/60 text-white/90 border border-white/10">Camera Active</div>
+                {!isConnected && (
+                  <div className="mt-3 p-3 bg-yellow-900/20 border border-yellow-800 rounded-lg max-w-md mx-auto">
+                    <div className="flex items-center gap-2 text-yellow-300 text-sm justify-center">
+                      <ExclamationTriangleIcon className="h-4 w-4" />
+                      Connect wallet to submit proofs to blockchain
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center justify-center gap-3 p-4 border-t border-white/10 bg-gradient-to-b from-white/5 to-transparent">
-                <button onClick={capturePhoto} className="inline-flex items-center gap-2 cta-dark px-5 py-2.5 text-base">
-                  <PhotoIcon className="h-5 w-5" /> Capture
-                </button>
-                <button onClick={() => stopCamera({ clearPhoto: true })} className="inline-flex items-center gap-2 pill px-5 py-2.5">
-                  <XMarkIcon className="h-5 w-5" /> Cancel
-                </button>
+              <div className="card-dark overflow-hidden rounded-[16px]">
+                <div className="relative">
+                  <div className="panel-dark aspect-[16/10] w-full bg-black/70">
+                    <video ref={videoRef} className="h-full w-full object-cover rounded-t-[16px]" playsInline muted autoPlay controls={false} />
+                  </div>
+                  <div className="pointer-events-none absolute inset-0 rounded-t-[16px] bg-[radial-gradient(circle_at_center,transparent_0,transparent_60%,rgba(255,255,255,0.04)_100%)]" />
+                  <div className="absolute top-4 left-4 text-[11px] px-2 py-1 rounded-full bg-black/60 text-white/90 border border-white/10">Camera Active</div>
+                </div>
+                <div className="flex items-center justify-center gap-3 p-4 border-t border-white/10 bg-gradient-to-b from-white/5 to-transparent">
+                  <button onClick={capturePhoto} className="inline-flex items-center gap-2 cta-dark px-5 py-2.5 text-base">
+                    <PhotoIcon className="h-5 w-5" /> Capture
+                  </button>
+                  <button onClick={() => stopCamera({ clearPhoto: true })} className="inline-flex items-center gap-2 pill px-5 py-2.5">
+                    <XMarkIcon className="h-5 w-5" /> Cancel
+                  </button>
+                </div>
               </div>
-            </div>
+            </>
           )}
 
           {capturedImage && (
@@ -332,6 +387,18 @@ export function TruthCamera({ autoStart = false }: Props) {
                   </div>
                 )}
               </div>
+              {isDownloadHelpOpen && (
+                <div className="fixed inset-0 z-50 grid place-items-center bg-black/50">
+                  <div className="panel-dark rounded-[16px] p-5 max-w-sm mx-auto text-center">
+                    <h4 className="text-slate-100 text-base mb-2">Download Image</h4>
+                    <p className="text-slate-300 text-sm mb-4">Tap the button below to open the image in a new tab, then long-press to save. Tap Download again to dismiss this popup.</p>
+                    <div className="flex items-center justify-center gap-3">
+                      <a href={iosDownloadUrl ?? '#'} target="_blank" rel="noopener noreferrer" className="cta-dark px-4 py-2 text-sm">Open Image</a>
+                      <button onClick={() => setIsDownloadHelpOpen(false)} className="pill px-4 py-2 text-sm">Close</button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
