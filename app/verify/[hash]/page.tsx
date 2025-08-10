@@ -34,35 +34,33 @@ export default function VerifyHashPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black flex items-center justify-center">
+      <div className="min-h-screen bg-hero-dark flex items-center justify-center">
         <div className="text-center">
           <div className="h-10 w-10 sm:h-12 sm:w-12 animate-spin rounded-full border-2 border-white/20 border-t-white mb-4 mx-auto"></div>
-          <p className="text-gray-300 text-sm sm:text-base">Loading verification details…</p>
+          <p className="text-slate-300 text-sm sm:text-base">Loading verification details…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
-      <div className="container mx-auto px-4 py-6 sm:py-10">
+    <div className="min-h-screen bg-hero-dark">
+      <div className="page-container mx-auto max-w-6xl py-8 sm:py-12">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 sm:mb-10">
+        <div className="flex items-center justify-between mb-8 sm:mb-12">
           <Link
             href="/verify"
-            className="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
+            className="flex items-center text-cyan-300 hover:text-cyan-200 transition-colors"
           >
             <ArrowLeftIcon className="h-5 w-5 mr-2" />
             <span className="hidden sm:inline">Back to Verify</span>
             <span className="sm:hidden">Back</span>
           </Link>
-          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-            Details
-          </span>
+          <span className="pill px-2.5 py-1 text-xs">Details</span>
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8">
+          <div className="relative card-dark rounded-[16px] p-6 sm:p-8">
             {proof ? (
               <>
                 {/* Status Header */}
@@ -70,7 +68,7 @@ export default function VerifyHashPage() {
                   <CheckCircleIcon className="h-6 w-6 sm:h-7 sm:w-7 text-emerald-400 mr-3" />
                   <div>
                     <h2 className="text-xl sm:text-2xl font-medium text-emerald-300">✅ Verified Image</h2>
-                    <p className="text-gray-300 mt-1 text-sm sm:text-base">
+                    <p className="text-slate-300 mt-1 text-sm sm:text-base">
                       This image is authentic and has been verified in your local store.
                     </p>
                   </div>
@@ -80,14 +78,14 @@ export default function VerifyHashPage() {
                 <div className="space-y-6 sm:space-y-8">
                   {/* Image Hash */}
                   <div>
-                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">Image Hash (SHA-256)</label>
+                    <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1">Image Hash (SHA-256)</label>
                     <div className="flex items-center space-x-2">
-                      <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">
+                      <code className="code-block flex-1 text-xs sm:text-sm">
                         {proof.imageHash}
                       </code>
                       <button
                         onClick={() => copyToClipboard(proof.imageHash)}
-                        className="flex-shrink-0 p-2 text-gray-300 hover:text-white"
+                        className="flex-shrink-0 p-2 text-slate-300 hover:text-white"
                         title="Copy hash"
                       >
                         <DocumentDuplicateIcon className="h-5 w-5" />
@@ -97,14 +95,14 @@ export default function VerifyHashPage() {
 
                   {/* Proof ID */}
                   <div>
-                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">Proof ID</label>
+                    <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1">Proof ID</label>
                     <div className="flex items-center space-x-2">
-                      <code className="flex-1 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">
+                      <code className="code-block flex-1 text-xs sm:text-sm">
                         {proof.id}
                       </code>
                       <button
                         onClick={() => copyToClipboard(proof.id)}
-                        className="flex-shrink-0 p-2 text-gray-300 hover:text-white"
+                        className="flex-shrink-0 p-2 text-slate-300 hover:text-white"
                         title="Copy ID"
                       >
                         <DocumentDuplicateIcon className="h-5 w-5" />
@@ -114,40 +112,40 @@ export default function VerifyHashPage() {
 
                   {/* File Information */}
                   <div>
-                    <h3 className="text-lg font-medium text-white mb-4">File Information</h3>
+                    <h3 className="text-lg font-medium text-slate-100 mb-4">File Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       <div>
-                        <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">File Name</label>
-                        <p className="text-gray-100 bg-black/40 border border-white/10 p-3 rounded-lg text-sm sm:text-base">{proof.fileName}</p>
+                        <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1">File Name</label>
+                        <p className="text-slate-100 bg-black/40 border border-white/10 p-3 rounded-lg text-sm sm:text-base">{proof.fileName}</p>
                       </div>
                       <div>
-                        <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">File Size</label>
-                        <p className="text-gray-100 bg-black/40 border border-white/10 p-3 rounded-lg text-sm sm:text-base">{formatFileSize(proof.fileSize)}</p>
+                        <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1">File Size</label>
+                        <p className="text-slate-100 bg-black/40 border border-white/10 p-3 rounded-lg text-sm sm:text-base">{formatFileSize(proof.fileSize)}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Timestamp Information */}
                   <div>
-                    <h3 className="text-lg font-medium text-white mb-4">Timestamp Information</h3>
+                    <h3 className="text-lg font-medium text-slate-100 mb-4">Timestamp Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       <div>
-                        <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">Upload Date</label>
-                        <p className="text-gray-100 bg-black/40 border border-white/10 p-3 rounded-lg text-sm sm:text-base">{formatDate(proof.createdAt)}</p>
+                        <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1">Upload Date</label>
+                        <p className="text-slate-100 bg-black/40 border border-white/10 p-3 rounded-lg text-sm sm:text-base">{formatDate(proof.createdAt)}</p>
                       </div>
                       <div>
-                        <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">Original Timestamp</label>
-                        <p className="text-gray-100 bg-black/40 border border-white/10 p-3 rounded-lg text-sm sm:text-base">{formatDate(proof.metadata.timestamp)}</p>
+                        <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1">Original Timestamp</label>
+                        <p className="text-slate-100 bg-black/40 border border-white/10 p-3 rounded-lg text-sm sm:text-base">{formatDate(proof.metadata.timestamp)}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Metadata */}
                   <div>
-                    <h3 className="text-lg font-medium text-white mb-4">Device Information</h3>
+                    <h3 className="text-lg font-medium text-slate-100 mb-4">Device Information</h3>
                     <div>
-                      <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">User Agent</label>
-                      <p className="text-gray-100 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all">{proof.metadata.deviceInfo}</p>
+                      <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1">User Agent</label>
+                      <p className="text-slate-100 bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all">{proof.metadata.deviceInfo}</p>
                     </div>
                   </div>
 
@@ -168,15 +166,15 @@ export default function VerifyHashPage() {
                   <XCircleIcon className="h-6 w-6 sm:h-7 sm:w-7 text-red-400 mr-3" />
                   <div>
                     <h2 className="text-xl sm:text-2xl font-medium text-red-300">❌ Image Not Found</h2>
-                    <p className="text-gray-300 mt-1 text-sm sm:text-base">This hash was not found in your local authenticity store.</p>
+                    <p className="text-slate-300 mt-1 text-sm sm:text-base">This hash was not found in your local authenticity store.</p>
                   </div>
                 </div>
 
                 <div className="space-y-4 sm:space-y-6">
                   {/* Hash Display */}
                   <div>
-                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">Searched Hash</label>
-                    <code className="block bg-black/40 border border-white/10 p-3 rounded-lg text-xs sm:text-sm font-mono break-all text-gray-100">{hash}</code>
+                    <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1">Searched Hash</label>
+                    <code className="code-block block text-xs sm:text-sm">{hash}</code>
                   </div>
 
                   {/* Not Found Message */}
@@ -189,10 +187,10 @@ export default function VerifyHashPage() {
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/10">
-              <Link href="/verify" className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 text-center">
+              <Link href="/verify" className="px-4 py-2 pill text-center">
                 Verify Another Image
               </Link>
-              <Link href="/upload" className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-center">
+              <Link href="/upload" className="px-4 py-2 cta-dark text-white text-center">
                 Take Photo
               </Link>
             </div>
