@@ -108,7 +108,7 @@ export default function VerifyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
+    <div className="min-h-screen tc-hero">
       <div className="container mx-auto px-4 py-6 sm:py-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 sm:mb-10">
@@ -121,7 +121,7 @@ export default function VerifyPage() {
             <span className="sm:hidden">Back</span>
           </Link>
           <div className="flex items-center gap-4">
-            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 text-white/80 bg-white/5">
               Research Prototype
             </span>
             <WalletConnect />
@@ -150,15 +150,15 @@ export default function VerifyPage() {
           <div
             className={`relative overflow-hidden rounded-2xl border-2 border-dashed transition-colors ${
               isDragging
-                ? 'border-blue-400 bg-blue-500/5'
-                : 'border-white/20 bg-white/5'
-            } backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-8 sm:p-12`}
+                ? 'border-orange-400 bg-orange-500/5 tc-drag-animate'
+                : 'border-white/20 bg-black/30'
+            } backdrop-blur-xl tc-glow-orange p-8 sm:p-12`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
             <div className="text-center">
-              <DocumentMagnifyingGlassIcon className="h-16 w-16 sm:h-20 sm:w-20 text-emerald-400/90 mx-auto mb-5" />
+              <DocumentMagnifyingGlassIcon className="h-16 w-16 sm:h-20 sm:w-20 text-orange-400/90 mx-auto mb-5" />
               <h3 className="text-xl sm:text-2xl font-medium text-white mb-2">
                 Verify Image Authenticity
               </h3>
@@ -175,7 +175,7 @@ export default function VerifyPage() {
               />
               <label
                 htmlFor="file-input"
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 sm:px-8 py-3 text-white font-medium shadow-lg shadow-emerald-900/40 hover:from-emerald-400 hover:to-teal-500 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl tc-btn-orange px-6 sm:px-8 py-3 font-medium cursor-pointer"
               >
                 <DocumentMagnifyingGlassIcon className="h-5 w-5" />
                 Select Image to Verify
@@ -210,33 +210,33 @@ export default function VerifyPage() {
 
           {/* Verification Result */}
           {result && (
-            <div className={`relative overflow-hidden rounded-2xl border backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-6 sm:p-8 ${
+            <div className={`relative overflow-hidden rounded-2xl border backdrop-blur-xl p-6 sm:p-8 ${
               result.isAuthentic
-                ? 'border-emerald-500/20 bg-emerald-500/5'
-                : 'border-red-500/20 bg-red-500/5'
+                ? 'tc-glow-blue bg-black/30 border-white/10'
+                : 'tc-glow-orange bg-black/30 border-white/10'
             }`}>
               <div className="flex items-start gap-4">
                 <div className={`p-3 rounded-xl border ${
                   result.isAuthentic
-                    ? 'bg-emerald-500/10 border-emerald-500/20'
-                    : 'bg-red-500/10 border-red-500/20'
+                    ? 'bg-sky-500/10 border-sky-500/20'
+                    : 'bg-orange-500/10 border-orange-500/20'
                 }`}>
                   {result.isAuthentic ? (
-                    <CheckCircleIcon className="h-8 w-8 text-emerald-400" />
+                    <CheckCircleIcon className="h-8 w-8 text-sky-300" />
                   ) : (
-                    <XCircleIcon className="h-8 w-8 text-red-400" />
+                    <XCircleIcon className="h-8 w-8 text-orange-400" />
                   )}
                 </div>
                 <div className="flex-1">
                   <h3 className={`text-xl sm:text-2xl font-medium mb-2 ${
-                    result.isAuthentic ? 'text-emerald-200' : 'text-red-200'
+                    result.isAuthentic ? 'text-sky-200' : 'text-orange-200'
                   }`}>
                     {result.isAuthentic ? 'Image Verified ✓' : 'Image Not Found ✗'}
                   </h3>
                   <p className={`mb-6 text-sm sm:text-base ${
                     result.isAuthentic 
-                      ? 'text-emerald-200/90' 
-                      : 'text-red-200/90'
+                      ? 'text-sky-200/90' 
+                      : 'text-orange-200/90'
                   }`}>
                     {result.isAuthentic
                       ? 'This image has been verified and exists on the blockchain with authentic proof.'
@@ -248,8 +248,8 @@ export default function VerifyPage() {
                     <label className="block text-sm font-medium text-gray-300 mb-1">Image Hash (SHA-256)</label>
                     <code className={`block px-3 py-2 rounded-lg text-xs sm:text-sm font-mono break-all border ${
                       result.isAuthentic
-                        ? 'bg-black/20 border-emerald-500/20 text-emerald-200'
-                        : 'bg-black/20 border-red-500/20 text-red-200'
+                        ? 'bg-black/20 border-sky-500/20 text-sky-200'
+                        : 'bg-black/20 border-orange-500/20 text-orange-200'
                     }`}>
                       {result.hash}
                     </code>
@@ -260,14 +260,14 @@ export default function VerifyPage() {
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-emerald-300 mb-1">Submitter</label>
-                          <div className="px-3 py-2 bg-black/20 border border-emerald-500/20 rounded-lg text-emerald-200 text-xs sm:text-sm font-mono">
+                          <label className="block text-sm font-medium text-sky-300 mb-1">Submitter</label>
+                          <div className="px-3 py-2 bg-black/20 border border-sky-500/20 rounded-lg text-sky-200 text-xs sm:text-sm font-mono">
                             {formatAddress(result.proof.submitter)}
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-emerald-300 mb-1">Timestamp</label>
-                          <div className="px-3 py-2 bg-black/20 border border-emerald-500/20 rounded-lg text-emerald-200 text-xs sm:text-sm">
+                          <label className="block text-sm font-medium text-sky-300 mb-1">Timestamp</label>
+                          <div className="px-3 py-2 bg-black/20 border border-sky-500/20 rounded-lg text-sky-200 text-xs sm:text-sm">
                             {formatTimestamp(result.proof.timestamp)}
                           </div>
                         </div>

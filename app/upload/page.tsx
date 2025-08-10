@@ -435,7 +435,7 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
+    <div className="min-h-screen tc-hero">
       <div className="container mx-auto px-4 py-6 sm:py-10">
         {/* Hero Header */}
         <div className="flex items-center justify-between mb-6 sm:mb-10">
@@ -448,7 +448,7 @@ export default function UploadPage() {
             <span className="sm:hidden">Back</span>
           </Link>
           <div className="flex items-center gap-4">
-            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 text-white/80 bg-white/5">
               Research Prototype
             </span>
             <WalletConnect />
@@ -478,7 +478,7 @@ export default function UploadPage() {
             <>
               {/* Idle State */}
               {!isCameraActive && !capturedImage && (
-                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)] p-8">
+                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl tc-glow-orange p-8">
                   <div className="text-center">
                     <CameraIcon className="h-16 w-16 sm:h-20 sm:w-20 text-blue-400/90 mx-auto mb-5" />
                     <h3 className="text-xl sm:text-2xl font-medium text-white mb-2">
@@ -487,10 +487,10 @@ export default function UploadPage() {
                     <p className="text-gray-300/90 mb-6 text-sm sm:text-base">
                       Capture an authentic frame straight from your device sensor. No files, no drag-and-drop.
                     </p>
-                    <button
-                      onClick={startCamera}
-                      className="mx-auto inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 sm:px-8 py-3 text-white font-medium shadow-lg shadow-blue-900/40 hover:from-blue-500 hover:to-indigo-500 transition-colors"
-                    >
+                      <button
+                        onClick={startCamera}
+                        className="mx-auto inline-flex items-center gap-2 rounded-xl tc-btn-orange px-6 sm:px-8 py-3 font-medium"
+                      >
                       <CameraIcon className="h-5 w-5" />
                       Start Camera
                     </button>
@@ -503,7 +503,7 @@ export default function UploadPage() {
 
               {/* Camera View */}
               {isCameraActive && (
-                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
+                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl tc-glow-blue">
                   <div className="relative">
                     <div className="aspect-[16/10] w-full bg-black/70">
                       <video
@@ -535,7 +535,7 @@ export default function UploadPage() {
                   <div className="flex items-center justify-center gap-3 p-4 border-t border-white/10 bg-gradient-to-b from-white/5 to-transparent">
                     <button
                       onClick={capturePhoto}
-                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-5 py-2.5 text-white font-medium shadow-lg shadow-indigo-900/40 hover:from-indigo-400 hover:to-violet-500 transition-colors text-base"
+                      className="inline-flex items-center gap-2 rounded-xl tc-btn-blue px-5 py-2.5 font-medium text-base"
                     >
                       <PhotoIcon className="h-5 w-5" />
                       Capture
@@ -553,7 +553,7 @@ export default function UploadPage() {
 
               {/* Captured Image Preview */}
               {capturedImage && (
-                <div ref={previewRef} className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
+                <div ref={previewRef} className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl tc-glow-blue">
                   <div className="relative">
                     <img
                       src={capturedImage}
@@ -568,9 +568,7 @@ export default function UploadPage() {
                       }}
                     />
                     <div className="pointer-events-none absolute inset-0 rounded-t-2xl bg-[radial-gradient(circle_at_center,transparent_0,transparent_60%,rgba(255,255,255,0.04)_100%)]" />
-                    <div className="absolute top-4 left-4 text-[11px] px-2 py-1 rounded-full bg-black/60 text-white/90 border border-white/10">
-                      Authentic Frame
-                    </div>
+                    <div className="absolute top-4 left-4 text-[11px] px-2 py-1 rounded-full bg-black/60 text-orange-200/90 border border-orange-500/30">Authentic Frame</div>
                     <div className="absolute top-4 right-4 flex gap-2">
                       <button
                         onClick={downloadImage}
@@ -610,9 +608,9 @@ export default function UploadPage() {
                         <button
                           onClick={processCapturedImage}
                           disabled={isProcessing || isBlockchainLoading || !canSubmitProofs()}
-                          className={`inline-flex items-center justify-center rounded-xl px-4 py-3 font-medium shadow-lg transition-colors ${
+                          className={`inline-flex items-center justify-center rounded-xl px-4 py-3 font-medium transition-colors ${
                             canSubmitProofs() && !isProcessing && !isBlockchainLoading
-                              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-emerald-900/40'
+                              ? 'tc-btn-orange'
                               : 'bg-gray-600 text-gray-300 cursor-not-allowed'
                           }`}
                         >
