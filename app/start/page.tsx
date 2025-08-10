@@ -19,13 +19,13 @@ export default function StartPage() {
       <div className="sticky top-0 z-20 backdrop-blur border-b border-white/10">
         <div className="page-container mx-auto max-w-6xl py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-cyan-500/10 border border-cyan-300/20">
-              <CameraIcon className="h-5 w-5 text-cyan-300" />
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-orange-500/10 border border-orange-400/30 shadow-[0_0_20px_rgba(249,115,22,0.25)]">
+              <CameraIcon className="h-5 w-5 text-orange-400" />
             </div>
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-emerald-500/10 border border-emerald-300/20">
-              <ShieldCheckIcon className="h-5 w-5 text-emerald-300" />
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-blue-500/10 border border-blue-400/30">
+              <ShieldCheckIcon className="h-5 w-5 text-blue-300" />
             </div>
-            <Link href="/" className="hidden sm:inline text-slate-200 text-sm font-medium hover:text-slate-100">Truth Camera</Link>
+            <Link href="/" className="hidden sm:inline text-sm font-semibold neon-text-orange hover:opacity-95">Truth Camera</Link>
           </div>
           <div className="flex items-center gap-3">
             <span className="pill px-2.5 py-1 text-xs">Secure Zone</span>
